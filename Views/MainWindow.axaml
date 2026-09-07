@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:WindowsStickies.ViewModels"
+        xmlns:views="clr-namespace:WindowsStickies.Views"
+        x:Class="WindowsStickies.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        mc:Ignorable="d"
+        d:DesignWidth="280"
+        d:DesignHeight="240"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        Width="280"
+        Height="240"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Stickies"
+        Topmost="{Binding TitleBar.IsTopmost}"
+        WindowState="{Binding TitleBar.WindowState, Mode=TwoWay}">
+
+    
+
+    <Grid RowDefinitions="16, *">    
+        <views:MainView Grid.Row="0" Grid.RowSpan="2"/>
+        <views:TitleBarView Grid.Row="0" DataContext="{Binding TitleBar}"/>
+    </Grid>
+
+</Window>
