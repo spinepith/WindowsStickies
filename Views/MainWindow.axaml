@@ -10,7 +10,7 @@
         d:DesignWidth="280"
         d:DesignHeight="240"
         ExtendClientAreaToDecorationsHint="True"
-        WindowDecorations="None"
+        WindowDecorations="BorderOnly"
         TransparencyLevelHint="Transparent"
         Background="Transparent"
         Width="280"
@@ -20,7 +20,22 @@
         Topmost="{Binding TitleBar.IsTopmost}"
         WindowState="{Binding TitleBar.WindowState, Mode=TwoWay}">
 
-    
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="" />
+        <KeyBinding Gesture="Ctrl+X" Command="" />
+        <KeyBinding Gesture="Ctrl+C" Command="" />
+        <KeyBinding Gesture="Ctrl+V" Command="" />
+        <KeyBinding Gesture="Ctrl+D" Command="" />
+        <KeyBinding Gesture="Ctrl+A" Command="" />
+        <KeyBinding Gesture="Ctrl+F" Command="" />
+        <KeyBinding Gesture="Ctrl+T" Command="" />
+        <KeyBinding Gesture="Ctrl+B" Command="" />
+        <KeyBinding Gesture="Ctrl+I" Command="" />
+        <KeyBinding Gesture="Ctrl+U" Command="" />
+        <KeyBinding Gesture="Ctrl+OemPlus" Command="" />
+        <KeyBinding Gesture="Ctrl+OemMinus" Command="" />
+        <KeyBinding Gesture="Ctrl+Shift+C" Command="" />
+    </Window.KeyBindings>
 
     <Grid RowDefinitions="16, *">    
         <views:MainView Grid.Row="0" Grid.RowSpan="2"/>

@@ -17,8 +17,8 @@
                     <Svg Path="/Assets/all-notes.svg" Stretch="Uniform"/>
                 </Button>-->
                 
-                <Button Width="10" Background="Transparent" Padding="0" Command="{Binding ToggleTopmostCommand}">
-                    <Svg Path="{Binding PinIconPath}" Stretch="Uniform"/>
+                <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding ToggleTopmostCommand}">
+                    <Svg Path="{CompiledBinding PinIconPath}" Stretch="Uniform"/>
                 </Button>
 
                 <Button Width="10" Background="Transparent" Padding="0">
@@ -28,68 +28,68 @@
                     <Button.Flyout>
                         <MenuFlyout>
 
-                            <MenuItem Header="{Binding [Menu_NewNote], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_NewNote], Source={x:Static locales:Localizer.Instance}}" InputGesture="Ctrl+N"/>
                             <Separator />
 
-                            <MenuItem Header="{Binding [Menu_File], Source={x:Static locales:Localizer.Instance}}">
-                                <MenuItem Header="{Binding [Menu_File_Import], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_File_Export], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_File_RuledLines], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_File], Source={x:Static locales:Localizer.Instance}}">
+                                <MenuItem Header="{CompiledBinding [Menu_File_Import], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_File_Export], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_File_RuledLines], Source={x:Static locales:Localizer.Instance}}" />
                             </MenuItem>
 
-                            <MenuItem Header="{Binding [Menu_Edit], Source={x:Static locales:Localizer.Instance}}">
-                                <MenuItem Header="{Binding [Menu_Edit_Cut], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Edit_Copy], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Edit_Paste], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Edit_Delete], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Edit_SelectAll], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_Edit], Source={x:Static locales:Localizer.Instance}}">
+                                <MenuItem Header="{CompiledBinding [Menu_Edit_Cut], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+X"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Edit_Copy], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+C"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Edit_Paste], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+V"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Edit_Delete], Source={x:Static locales:Localizer.Instance}}" InputGesture="Ctrl+D"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Edit_SelectAll], Source={x:Static locales:Localizer.Instance}}" InputGesture="Ctrl+A"/>
                                 <Separator />
-                                <MenuItem Header="{Binding [Menu_Edit_Find], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Edit_Find], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+F"/>
                             </MenuItem>
 
-                            <MenuItem Header="{Binding [Menu_Font], Source={x:Static locales:Localizer.Instance}}">
-                                <MenuItem Header="{Binding [Menu_Font_ShowFonts], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_Font], Source={x:Static locales:Localizer.Instance}}">
+                                <MenuItem Header="{CompiledBinding [Menu_Font_ShowFonts], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+T"/>
                                 <Separator />
-                                <MenuItem Header="{Binding [Menu_Font_Bold], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Font_Italic], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Font_Underline], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Font_Strikethrough], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Bold], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+B"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Italic], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+I"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Underline], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+U"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Strikethrough], Source={x:Static locales:Localizer.Instance}}" />
                                 <Separator />
-                                <MenuItem Header="{Binding [Menu_Font_Increase], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Font_Decrease], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Increase], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+OemPlus"/>
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Decrease], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+OemMinus"/>
                                 <Separator />
-                                <MenuItem Header="{Binding [Menu_Font_Color], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Font_Color], Source={x:Static locales:Localizer.Instance}}"  InputGesture="Ctrl+Shift+C"/>
                             </MenuItem>
 
-                            <MenuItem Header="{Binding [Menu_Color], Source={x:Static locales:Localizer.Instance}}">
-                                <MenuItem Header="{Binding [Menu_Color_White], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Color_Gray], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Color_Yellow], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Color_Blue], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Color_Green], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Color_Pink], Source={x:Static locales:Localizer.Instance}}" />
-                                <MenuItem Header="{Binding [Menu_Color_Black], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_Color], Source={x:Static locales:Localizer.Instance}}">
+                                <MenuItem Header="{CompiledBinding [Menu_Color_White], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Color_Gray], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Color_Yellow], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Color_Blue], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Color_Green], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Color_Pink], Source={x:Static locales:Localizer.Instance}}" />
+                                <MenuItem Header="{CompiledBinding [Menu_Color_Black], Source={x:Static locales:Localizer.Instance}}" />
                             </MenuItem>
 
-                            <MenuItem Header="{Binding [Menu_Language], Source={x:Static locales:Localizer.Instance}}" ItemsSource="{Binding AvailableLanguages}">
+                            <MenuItem Header="{CompiledBinding [Menu_Language], Source={x:Static locales:Localizer.Instance}}" ItemsSource="{CompiledBinding AvailableLanguages}">
 
                                 <MenuItem.ItemTemplate>
                                     <DataTemplate x:DataType="vm:LanguageItem">
-                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Text="{CompiledBinding Name}" />
                                     </DataTemplate>
                                 </MenuItem.ItemTemplate>
 
-                                <MenuItem.Styles>
-                                    <Style Selector="MenuItem" x:CompileBindings="False">
-                                        <Setter Property="CommandParameter" Value="{Binding Code}" />
-                                        <Setter Property="Command" Value="{Binding $parent[UserControl].DataContext.ChangeLanguageCommand}" />
-                                    </Style>
-                                </MenuItem.Styles>
+                                <MenuItem.ItemContainerTheme>
+                                    <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" x:DataType="vm:LanguageItem">
+                                        <Setter Property="CommandParameter" Value="{CompiledBinding Code}" />
+                                        <Setter Property="Command" Value="{Binding $parent[UserControl].((vm:TitleBarViewModel)DataContext).ChangeLanguageCommand}" />
+                                    </ControlTheme>
+                                </MenuItem.ItemContainerTheme>
 
                             </MenuItem>
 
                             <Separator />
-                            <MenuItem Header="{Binding [Menu_About], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_About], Source={x:Static locales:Localizer.Instance}}" />
 
                         </MenuFlyout>
                     </Button.Flyout>
@@ -100,11 +100,11 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
                 
-                <Button Width="10" Background="Transparent" Padding="0" Command="{Binding MinimizeCommand}">
+                <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding MinimizeCommand}">
                     <Svg Path="/Assets/minimize.svg" Stretch="Uniform"/>
                 </Button>
                 
-                <Button Width="10" Background="Transparent" Padding="0" Command="{Binding $parent[Window].Close}">
+                <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding $parent[Window].Close}">
                     <Svg Path="/Assets/close.svg" Stretch="Uniform"/>
                 </Button>
 

@@ -14,6 +14,9 @@
         <SolidColorBrush x:Key="MenuFlyoutSubItemChevron">Black</SolidColorBrush>
         <SolidColorBrush x:Key="MenuFlyoutSubItemChevronPointerOver">Black</SolidColorBrush>
         <SolidColorBrush x:Key="MenuFlyoutSubItemChevronSubMenuOpened">Black</SolidColorBrush>
+        <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForeground">Black</SolidColorBrush>
+        <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver">Black</SolidColorBrush>
+        <SolidColorBrush x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed">Black</SolidColorBrush>
         <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
     </Application.Resources>
 
@@ -31,6 +34,13 @@
                          MenuItem:selected /template/ ContentPresenter#PART_HeaderPresenter,
                          MenuItem:pressed /template/ ContentPresenter#PART_HeaderPresenter">
             <Setter Property="TextBlock.Foreground" Value="Black" />
+        </Style>
+
+        <Style Selector="MenuItem /template/ TextBlock#PART_InputGestureText,
+                         MenuItem:pointerover /template/ TextBlock#PART_InputGestureText,
+                         MenuItem:selected /template/ TextBlock#PART_InputGestureText,
+                         MenuItem:pressed /template/ TextBlock#PART_InputGestureText">
+            <Setter Property="Foreground" Value="Black" />
         </Style>
 
         <Style Selector="MenuItem /template/ Border#PART_LayoutRoot">
