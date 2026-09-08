@@ -9,7 +9,7 @@
              x:Class="WindowsStickies.Views.BaseTitleBarView"
              x:DataType="vm:BaseTitleBarViewModel">
 
-    <Border VerticalAlignment="Top" Background="#40000000" Padding="4, 2" PointerPressed="TitleBar_PointerPressed">
+    <Border VerticalAlignment="Top" Background="#40000000" Padding="3, 2" PointerPressed="TitleBar_PointerPressed">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2">
                 
             <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding MinimizeCommand}">

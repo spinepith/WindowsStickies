@@ -26,7 +26,7 @@
                     <Button.Flyout>
                         <MenuFlyout>
 
-                            <MenuItem Header="{CompiledBinding [Menu_NewNote], Source={x:Static locales:Localizer.Instance}}" InputGesture="Ctrl+N"/>
+                            <MenuItem Header="{CompiledBinding [Menu_NewNote], Source={x:Static locales:Localizer.Instance}}" Command="{CompiledBinding NewStickyCommand}" InputGesture="Ctrl+N"/>
                             <Separator />
 
                             <MenuItem Header="{CompiledBinding [Menu_File], Source={x:Static locales:Localizer.Instance}}">
@@ -81,14 +81,14 @@
                                 <MenuItem.ItemContainerTheme>
                                     <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" x:DataType="vm:LanguageItem">
                                         <Setter Property="CommandParameter" Value="{CompiledBinding Code}" />
-                                        <Setter Property="Command" Value="{CompiledBinding $parent[UserControl].((vm:TitleBarViewModel)DataContext).ChangeLanguageCommand}" />
+                                        <Setter Property="Command" Value="{CompiledBinding Command}" />
                                     </ControlTheme>
                                 </MenuItem.ItemContainerTheme>
 
                             </MenuItem>
 
                             <Separator />
-                            <MenuItem Header="{CompiledBinding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" Command="{CompiledBinding ChangeCornerRadiusCommand}" />
 
                             <Separator />
                             <MenuItem Header="{CompiledBinding [Menu_About], Source={x:Static locales:Localizer.Instance}}" Command="{CompiledBinding ShowAboutCommand}" />

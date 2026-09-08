@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using System.Runtime.InteropServices;
 using System;
-using CommunityToolkit.Mvvm.Messaging;
 
 namespace WindowsStickies.Views;
 
@@ -11,18 +10,22 @@ public partial class MainWindow : Window {
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             Opened += (s, e) => {
-                if (TryGetPlatformHandle()?.Handle is IntPtr hwnd) {
-                    SetWindowCornerPreference(hwnd, DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_DONOTROUND);
+                ApplyCornerPreference();
+            };
+            
+            Services.SettingsService.Instance.PropertyChanged += (s, e) => {
+                if (e.PropertyName is nameof(Services.SettingsService.IsRoundedCorners)) {
+                    ApplyCornerPreference();
                 }
             };
         }
+    }
 
-        CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Register<MainWindow, Models.OpenAboutMessage>(this, (r, m) => {
-            var aboutWindow = new AboutWindow {
-                DataContext = new ViewModels.BaseTitleBarViewModel()
-            };
-            aboutWindow.ShowDialog(this);
-        });
+    private void ApplyCornerPreference() {
+        if (TryGetPlatformHandle()?.Handle is IntPtr hwnd) {
+            var preference = Services.SettingsService.Instance.IsRoundedCorners ? DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND : DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_DONOTROUND;
+            SetWindowCornerPreference(hwnd, preference);
+        }
     }
 
     [DllImport("dwmapi.dll")]
