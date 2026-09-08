@@ -5,20 +5,69 @@ using System;
 namespace WindowsStickies.Views;
 
 public partial class MainWindow : Window {
+    private readonly Avalonia.Threading.DispatcherTimer _saveTimer;
+    private bool _isLoaded = false;
+
     public MainWindow() {
         InitializeComponent();
 
+        _saveTimer = new Avalonia.Threading.DispatcherTimer {
+            Interval = TimeSpan.FromMilliseconds(500)
+        };
+        _saveTimer.Tick += (s, e) => {
+            _saveTimer.Stop();
+            Services.SessionService.Instance.Save();
+        };
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-            Opened += (s, e) => {
+            this.Opened += (s, e) => {
+                if (DataContext is ViewModels.MainViewModel vm) {
+                    Position = new Avalonia.PixelPoint((int)vm.Model.X, (int)vm.Model.Y);
+                    Width = vm.Model.Width;
+                    Height = vm.Model.Height;
+                }
+                
                 ApplyCornerPreference();
+                
+                _isLoaded = true; 
             };
             
             Services.SettingsService.Instance.PropertyChanged += (s, e) => {
-                if (e.PropertyName is nameof(Services.SettingsService.IsRoundedCorners)) {
+                if (e.PropertyName == nameof(Services.SettingsService.IsRoundedCorners)) {
                     ApplyCornerPreference();
                 }
             };
         }
+
+        PositionChanged += (s, e) => {
+            if (!_isLoaded)
+                return;
+
+            if (DataContext is ViewModels.MainViewModel vm) {
+                vm.Model.X = Position.X;
+                vm.Model.Y = Position.Y;
+                _saveTimer.Stop();
+                _saveTimer.Start();
+            }
+        };
+
+        SizeChanged += (s, e) => {
+            if (!_isLoaded)
+                return;
+
+            if (DataContext is ViewModels.MainViewModel vm) {
+                vm.Model.Width = Width;
+                vm.Model.Height = Height;
+                _saveTimer.Stop();
+                _saveTimer.Start();
+            }
+        };
+
+        Closed += (s, e) => {
+            if (DataContext is ViewModels.MainViewModel vm) {
+                Services.SessionService.Instance.ActiveStickies.Remove(vm.Model);
+            }
+        };
     }
 
     private void ApplyCornerPreference() {

@@ -13,7 +13,12 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     public ObservableCollection<LanguageItem> AvailableLanguages { get; }
 
-    public TitleBarViewModel() {
+    public Models.StickyModel Model { get; }
+
+    public TitleBarViewModel(Models.StickyModel model) {
+        Model = model;
+        IsTopmost = model.IsTopmost;
+
         AvailableLanguages = new ObservableCollection<LanguageItem> {
             new LanguageItem { Name = "Русский", Code = "ru", Command = ChangeLanguageCommand },
             new LanguageItem { Name = "English", Code = "en", Command = ChangeLanguageCommand }
@@ -28,13 +33,18 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     [RelayCommand]
     private void ToggleTopmost() {
         IsTopmost = !IsTopmost;
+        if (Model is not null)
+            Model.IsTopmost = IsTopmost;
     }
     #endregion
 
     #region NEW STICKY
     [RelayCommand]
     private void NewSticky() {
-        WeakReferenceMessenger.Default.Send(new Models.NewNoteMessage());
+        if (Model is not null)
+            WeakReferenceMessenger.Default.Send(new Models.NewStickyMessage { SourceX = Model.X, SourceY = Model.Y });
+        else
+            WeakReferenceMessenger.Default.Send(new Models.NewStickyMessage());
     }
     #endregion
 

@@ -340,11 +340,11 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на New Note.
+        ///   Ищет локализованную строку, похожую на New Sticky.
         /// </summary>
-        public static string Menu_NewNote {
+        public static string Menu_NewSticky {
             get {
-                return ResourceManager.GetString("Menu_NewNote", resourceCulture);
+                return ResourceManager.GetString("Menu_NewSticky", resourceCulture);
             }
         }
         

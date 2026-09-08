@@ -26,7 +26,7 @@
                     <Button.Flyout>
                         <MenuFlyout>
 
-                            <MenuItem Header="{CompiledBinding [Menu_NewNote], Source={x:Static locales:Localizer.Instance}}" Command="{CompiledBinding NewStickyCommand}" InputGesture="Ctrl+N"/>
+                            <MenuItem Header="{CompiledBinding [Menu_NewSticky], Source={x:Static locales:Localizer.Instance}}" Command="{CompiledBinding NewStickyCommand}" InputGesture="Ctrl+N"/>
                             <Separator />
 
                             <MenuItem Header="{CompiledBinding [Menu_File], Source={x:Static locales:Localizer.Instance}}">

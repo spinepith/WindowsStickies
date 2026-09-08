@@ -210,7 +210,7 @@
   <data name="Menu_Language" xml:space="preserve">
     <value>Язык</value>
   </data>
-  <data name="Menu_NewNote" xml:space="preserve">
+  <data name="Menu_NewSticky" xml:space="preserve">
     <value>Новая записка</value>
   </data>
   <data name="Version" xml:space="preserve">

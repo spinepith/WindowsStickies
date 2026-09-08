@@ -1,8 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace WindowsStickies.Services;
 
@@ -35,7 +36,7 @@ public partial class SettingsService : ObservableObject {
             }
         }
         catch (Exception ex) {
-            Console.WriteLine(ex);
+            Debug.WriteLine(ex);
         }
 
         var newSettings = new SettingsService();
