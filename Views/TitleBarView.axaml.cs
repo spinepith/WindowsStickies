@@ -11,8 +11,12 @@ namespace WindowsStickies.Views {
 
         private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e) {
             if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) {
-                var window = TopLevel.GetTopLevel(this) as Window;
-                window?.BeginMoveDrag(e);
+                if (TopLevel.GetTopLevel(this) is Window window) {
+                    if (e.ClickCount is 2)
+                        window.WindowState = window.WindowState == WindowState.Maximized  ? WindowState.Normal : WindowState.Maximized;
+                    else
+                        window.BeginMoveDrag(e);
+                }
             }
         }
     }

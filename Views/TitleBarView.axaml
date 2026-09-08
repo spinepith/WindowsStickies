@@ -1,21 +1,19 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:WindowsStickies.ViewModels"
              xmlns:locales="clr-namespace:WindowsStickies.Locales"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d"
+             d:DesignWidth="280"
+             d:DesignHeight="240"
              x:Class="WindowsStickies.Views.TitleBarView"
              x:DataType="vm:TitleBarViewModel">
 
-    <Border Grid.Row="0" VerticalAlignment="Top" Background="#40000000" Padding="6, 2" PointerPressed="TitleBar_PointerPressed">
+    <Border VerticalAlignment="Top" Background="#40000000" Padding="3, 2" PointerPressed="TitleBar_PointerPressed">
         <Grid HorizontalAlignment="Stretch">
                     
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="4">
-            
-                <!--<Button Background="Transparent" Padding="0">
-                    <Svg Path="/Assets/all-notes.svg" Stretch="Uniform"/>
-                </Button>-->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="2">
                 
                 <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding ToggleTopmostCommand}">
                     <Svg Path="{CompiledBinding PinIconPath}" Stretch="Uniform"/>
@@ -34,6 +32,7 @@
                             <MenuItem Header="{CompiledBinding [Menu_File], Source={x:Static locales:Localizer.Instance}}">
                                 <MenuItem Header="{CompiledBinding [Menu_File_Import], Source={x:Static locales:Localizer.Instance}}" />
                                 <MenuItem Header="{CompiledBinding [Menu_File_Export], Source={x:Static locales:Localizer.Instance}}" />
+                                <Separator />
                                 <MenuItem Header="{CompiledBinding [Menu_File_RuledLines], Source={x:Static locales:Localizer.Instance}}" />
                             </MenuItem>
 
@@ -82,11 +81,14 @@
                                 <MenuItem.ItemContainerTheme>
                                     <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" x:DataType="vm:LanguageItem">
                                         <Setter Property="CommandParameter" Value="{CompiledBinding Code}" />
-                                        <Setter Property="Command" Value="{Binding $parent[UserControl].((vm:TitleBarViewModel)DataContext).ChangeLanguageCommand}" />
+                                        <Setter Property="Command" Value="{CompiledBinding $parent[UserControl].((vm:TitleBarViewModel)DataContext).ChangeLanguageCommand}" />
                                     </ControlTheme>
                                 </MenuItem.ItemContainerTheme>
 
                             </MenuItem>
+
+                            <Separator />
+                            <MenuItem Header="{CompiledBinding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" />
 
                             <Separator />
                             <MenuItem Header="{CompiledBinding [Menu_About], Source={x:Static locales:Localizer.Instance}}" />
@@ -104,7 +106,7 @@
                     <Svg Path="/Assets/minimize.svg" Stretch="Uniform"/>
                 </Button>
                 
-                <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding $parent[Window].Close}">
+                <Button Width="10" Background="Transparent" Padding="0" Command="{CompiledBinding CloseCommand}" CommandParameter="{CompiledBinding $parent[Window]}">
                     <Svg Path="/Assets/close.svg" Stretch="Uniform"/>
                 </Button>
 

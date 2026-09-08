@@ -70,6 +70,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Change Border.
+        /// </summary>
+        public static string Menu_ChangeBorder {
+            get {
+                return ResourceManager.GetString("Menu_ChangeBorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Color.
         /// </summary>
         public static string Menu_Color {

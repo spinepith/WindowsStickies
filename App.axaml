@@ -36,13 +36,6 @@
             <Setter Property="TextBlock.Foreground" Value="Black" />
         </Style>
 
-        <Style Selector="MenuItem /template/ TextBlock#PART_InputGestureText,
-                         MenuItem:pointerover /template/ TextBlock#PART_InputGestureText,
-                         MenuItem:selected /template/ TextBlock#PART_InputGestureText,
-                         MenuItem:pressed /template/ TextBlock#PART_InputGestureText">
-            <Setter Property="Foreground" Value="Black" />
-        </Style>
-
         <Style Selector="MenuItem /template/ Border#PART_LayoutRoot">
             <Setter Property="Margin" Value="4, 0" />
         </Style>

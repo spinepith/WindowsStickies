@@ -1,13 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 
-using Avalonia.Controls;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+
 namespace WindowsStickies.ViewModels;
 
-public partial class TitleBarViewModel : ViewModelBase {
+public partial class TitleBarViewModel : BaseTitleBarViewModel {
     public string PinIconPath => IsTopmost ? "/Assets/pinned.svg" : "/Assets/pin.svg";
 
     public ObservableCollection<LanguageItem> AvailableLanguages { get; } = new() {
@@ -16,18 +15,10 @@ public partial class TitleBarViewModel : ViewModelBase {
     };
 
     [ObservableProperty]
-    private WindowState _windowState = WindowState.Normal;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PinIconPath))]
     private bool _isTopmost = false;
 
     #region TITLE BAR
-    [RelayCommand]
-    private void Minimize() {
-        WindowState = WindowState.Minimized;
-    }
-
     [RelayCommand]
     private void ToggleTopmost() {
         IsTopmost = !IsTopmost;

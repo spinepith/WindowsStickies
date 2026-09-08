@@ -15,10 +15,10 @@
         Background="Transparent"
         Width="280"
         Height="240"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/icon.ico"
         Title="Stickies"
-        Topmost="{Binding TitleBar.IsTopmost}"
-        WindowState="{Binding TitleBar.WindowState, Mode=TwoWay}">
+        Topmost="{CompiledBinding TitleBar.IsTopmost}"
+        WindowState="{CompiledBinding TitleBar.WindowState, Mode=TwoWay}">
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+N" Command="" />
@@ -37,9 +37,9 @@
         <KeyBinding Gesture="Ctrl+Shift+C" Command="" />
     </Window.KeyBindings>
 
-    <Grid RowDefinitions="16, *">    
+    <Grid RowDefinitions="16, *">
         <views:MainView Grid.Row="0" Grid.RowSpan="2"/>
-        <views:TitleBarView Grid.Row="0" DataContext="{Binding TitleBar}"/>
+        <views:TitleBarView Grid.Row="0" DataContext="{CompiledBinding TitleBar}"/>
     </Grid>
 
 </Window>

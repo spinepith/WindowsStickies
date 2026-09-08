@@ -120,6 +120,9 @@
   <data name="Menu_About" xml:space="preserve">
     <value>О программе</value>
   </data>
+  <data name="Menu_ChangeBorder" xml:space="preserve">
+    <value>Изменить рамку</value>
+  </data>
   <data name="Menu_Color" xml:space="preserve">
     <value>Цвет</value>
   </data>

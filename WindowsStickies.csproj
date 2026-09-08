@@ -30,6 +30,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Lang.resx</DependentUpon>
     </Compile>
+    <Compile Update="Views\BaseTitleBarView.axaml.cs">
+      <DependentUpon>BaseTitleBarView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

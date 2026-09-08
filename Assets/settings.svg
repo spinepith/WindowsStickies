@@ -2,5 +2,6 @@
 	<style type="text/css">
 		.st0{fill:#FFFFFF;}
 	</style>
-	<path class="st0" d="M0 0h16v16H0z"/>
+	<path class="st0" d="M8 0a8 8 0 1 0 0 16A8 8 0 1 0 8 0z"/>
+	<!--<path class="st0" d="M0 0h16v16H0z"/>-->
 </svg>
