@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -91,7 +91,7 @@
                             <MenuItem Header="{CompiledBinding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" />
 
                             <Separator />
-                            <MenuItem Header="{CompiledBinding [Menu_About], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{CompiledBinding [Menu_About], Source={x:Static locales:Localizer.Instance}}" Command="{CompiledBinding ShowAboutCommand}" />
 
                         </MenuFlyout>
                     </Button.Flyout>

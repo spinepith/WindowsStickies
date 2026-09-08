@@ -1,7 +1,7 @@
-﻿using Avalonia.Controls;
-using Avalonia.Input;
+using Avalonia.Controls;
 using System.Runtime.InteropServices;
 using System;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace WindowsStickies.Views;
 
@@ -10,12 +10,19 @@ public partial class MainWindow : Window {
         InitializeComponent();
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-            this.Opened += (s, e) => {
+            Opened += (s, e) => {
                 if (TryGetPlatformHandle()?.Handle is IntPtr hwnd) {
                     SetWindowCornerPreference(hwnd, DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_DONOTROUND);
                 }
             };
         }
+
+        CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Register<MainWindow, Models.OpenAboutMessage>(this, (r, m) => {
+            var aboutWindow = new AboutWindow {
+                DataContext = new ViewModels.BaseTitleBarViewModel()
+            };
+            aboutWindow.ShowDialog(this);
+        });
     }
 
     [DllImport("dwmapi.dll")]

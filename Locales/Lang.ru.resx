@@ -213,4 +213,7 @@
   <data name="Menu_NewNote" xml:space="preserve">
     <value>Новая записка</value>
   </data>
+  <data name="Version" xml:space="preserve">
+    <value>Версия</value>
+  </data>
 </root>

@@ -1,7 +1,8 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 
 namespace WindowsStickies.ViewModels;
@@ -48,6 +49,10 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     #endregion
 
     #region ABOUT
+    [RelayCommand]
+    private void ShowAbout() {
+        WeakReferenceMessenger.Default.Send(new Models.OpenAboutMessage());
+    }
     #endregion
 }
 

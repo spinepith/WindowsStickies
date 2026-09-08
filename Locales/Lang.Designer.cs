@@ -347,5 +347,14 @@ namespace WindowsStickies.Locales {
                 return ResourceManager.GetString("Menu_NewNote", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Version.
+        /// </summary>
+        public static string Version {
+            get {
+                return ResourceManager.GetString("Version", resourceCulture);
+            }
+        }
     }
 }
