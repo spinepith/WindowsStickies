@@ -6,7 +6,6 @@ using Avalonia.VisualTree;
 
 using WindowsStickies.ViewModels;
 
-
 namespace WindowsStickies.Views {
     public partial class MainView : ContentPage {
         private double _currentFontSize = 16.0;
@@ -17,21 +16,19 @@ namespace WindowsStickies.Views {
         }
 
         private void MainView_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
-            // Инициализируем локализацию меню и применяем кастомный дизайн к попапу гиперссылок
             UpdateContextMenuLocale();
             StyleHyperlinkPopup();
 
-            // БАГ: Avalonia с исчезновением текста при ПЕРВОМ открытии попапа гиперссылки
-            // Происходит из-за того, что при первом открытии координаты попапа еще не просчитаны,
-            // и фокус внутри него сводит с ума главный ScrollViewer
-            // РЕШЕНИЕ: невидимо "промигиваем" попап при старте окна в том же кадре, заставляя движок его инициализировать
+            // БАГ: Avalonia с исчезновением текста при ПЕРВОМ открытии попапа гиперссылки.
+            // Происходит из-за того, что при первом открытии координаты попапа еще не просчитаны, 
+            // и фокус внутри него сводит с ума главный ScrollViewer.
+            // РЕШЕНИЕ: невидимо "промигиваем" попап при старте окна в том же кадре, заставляя движок его инициализировать.
             var popup = Editor.GetVisualDescendants().OfType<Avalonia.Controls.Primitives.Popup>().FirstOrDefault(p => p.Name is "HyperlinkPopup");
             if (popup is not null) {
                 popup.IsOpen = true;
                 popup.IsOpen = false;
             }
 
-            // Подписка на смену языка в реальном времени (обновляет тексты менюшек)
             Locales.Localizer.Instance.PropertyChanged += (s, ev) => {
                 if (ev.PropertyName is "Item") {
                     UpdateContextMenuLocale();
@@ -42,38 +39,41 @@ namespace WindowsStickies.Views {
             /* ЛОГИКА ОТОБРАЖЕНИЯ КОНТЕКСТНОГО МЕНЮ */
             var docIC = Editor.GetVisualDescendants().OfType<ItemsControl>().FirstOrDefault(c => c.Name is "DocIC");
             if (docIC is not null && docIC.ContextMenu is not null) {
+                var items = docIC.ContextMenu.Items.OfType<MenuItem>().ToList();
+                
+                // Подписываемся на клик по кнопке "Удалить гиперссылку"
+                if (items.Count >= 8) {
+                    items[7].Click += (senderClick, evClick) => {
+                        WiggleCursorToFixCache();
+                    };
+                }
+
                 docIC.ContextMenu.Opening += (sender, ev) => {
-                    var items = docIC.ContextMenu.Items.OfType<MenuItem>().ToList();
+                    var currentItems = docIC.ContextMenu.Items.OfType<MenuItem>().ToList();
 
-                    // Скрываем кнопки (Копировать, Вырезать, Удалить), если текст не выделен, чтобы они не занимали место
+                    // Скрываем неактивные кнопки (Копировать, Вырезать, Удалить)
                     bool hasSelection = Editor.FlowDocument.Selection.Length > 0;
-                    items[0].IsVisible = hasSelection;
-                    items[3].IsVisible = hasSelection;
-                    items[4].IsVisible = hasSelection;
+                    currentItems[0].IsVisible = hasSelection;
+                    currentItems[3].IsVisible = hasSelection;
+                    currentItems[4].IsVisible = hasSelection;
 
-                    /* ГИПЕРССЫЛКИ */
-                    if (items.Count >= 8) {
-                        items[5].IsVisible = false;
-                        items[6].IsVisible = false;
-                        items[7].IsVisible = false;
+                    bool hasHyperlink = IsCursorOnHyperlink();
+
+                    if (currentItems.Count >= 8) {
+                        currentItems[5].IsVisible = !hasHyperlink;
+                        currentItems[6].IsVisible = hasHyperlink;
+                        currentItems[7].IsVisible = hasHyperlink;
                     }
-
-                    var separator = docIC.ContextMenu.Items.OfType<Separator>().FirstOrDefault();
-                    if (separator is not null)
-                        separator.IsVisible = false;
                 };
             }
 
-            // Убираем мигающую каретку ввода, когда окно теряет фокус
             var topLevel = TopLevel.GetTopLevel(this) as Window;
             if (topLevel is not null) {
                 topLevel.Deactivated += (s, ev) => Editor.IsCaretVisible = false;
                 topLevel.Activated += (s, ev) => Editor.IsCaretVisible = true;
             }
 
-            /* СИНХРОНИЗАЦИЯ ТЕКСТА РЕДАКТОРА СО ВНУТРЕННЕЙ МОДЕЛЬЮ (ЗАГРУЗКА И СОХРАНЕНИЕ) */
             if (DataContext is MainViewModel vm) {
-                // Загружаем сохраненный текст при старте
                 if (string.IsNullOrWhiteSpace(vm.StickyModel.Text)) {
                     Editor.NewDocument();
                     SaveTextToModel();
@@ -81,14 +81,12 @@ namespace WindowsStickies.Views {
                 else
                     Editor.LoadXamlString(vm.StickyModel.Text);
 
-                // Отслеживаем изменение масштаба записки
                 Editor.Zoom = vm.StickyModel.Zoom;
                 vm.StickyModel.PropertyChanged += (s, ev) => {
                     if (ev.PropertyName is nameof(vm.StickyModel.Zoom))
                         Editor.Zoom = vm.StickyModel.Zoom;
                 };
 
-                // Отслеживаем перемещение курсора для синхронизации текущего размера шрифта
                 Editor.KeyUp += (s, ev) => {
                     SaveTextToModel();
                     if (ev.Key == Avalonia.Input.Key.Left || ev.Key == Avalonia.Input.Key.Right || ev.Key == Avalonia.Input.Key.Up || ev.Key == Avalonia.Input.Key.Down) {
@@ -105,7 +103,6 @@ namespace WindowsStickies.Views {
 
                 Editor.LostFocus += (s, ev) => SaveTextToModel();
 
-                // Обработчики кнопок из TitleBar и горячих клавиш
                 vm.TitleBar.EditorAction = (action) => {
                     switch (action) {
                         case "DeleteText":
@@ -154,13 +151,11 @@ namespace WindowsStickies.Views {
             }
         }
 
-        /// Сохраняет содержимое редактора в формате XAML во внутреннюю модель стикера
         private void SaveTextToModel() {
             if (DataContext is MainViewModel vm)
                 vm.StickyModel.Text = Editor.SaveXamlString();
         }
 
-        /// Обновляет перевод стандартного контекстного меню (ПКМ) при смене языка
         private void UpdateContextMenuLocale() {
             var docIC = Editor.GetVisualDescendants().OfType<ItemsControl>().FirstOrDefault(c => c.Name is "DocIC");
             if (docIC is not null && docIC.ContextMenu is not null) {
@@ -180,7 +175,6 @@ namespace WindowsStickies.Views {
             }
         }
 
-        /// Обновляет перевод внутри всплывающего окна гиперссылок
         private void UpdateHyperlinkPopupLocale() {
             var popup = Editor.GetVisualDescendants().OfType<Avalonia.Controls.Primitives.Popup>().FirstOrDefault(p => p.Name is "HyperlinkPopup");
             if (popup?.Child is Border popupBorder) {
@@ -202,17 +196,10 @@ namespace WindowsStickies.Views {
             }
         }
 
-        /// Полностью переопределяет внешний вид окна гиперссылок
         private void StyleHyperlinkPopup() {
             var popup = Editor.GetVisualDescendants().OfType<Avalonia.Controls.Primitives.Popup>().FirstOrDefault(p => p.Name is "HyperlinkPopup");
             if (popup is not null) {
-                // Блокируем всплытие события RequestBringIntoViewEvent, чтобы главный скролл не улетал в бесконечность
-                popup.AddHandler(Avalonia.Controls.Control.RequestBringIntoViewEvent, (s, ev) => {
-                    ev.Handled = true;
-                }, Avalonia.Interactivity.RoutingStrategies.Bubble, true);
-
                 if (popup.Child is Border popupBorder) {
-                    // Внешний дизайн рамки окна
                     popupBorder.Background = Avalonia.Media.Brush.Parse("#FFFFFF");
                     popupBorder.BorderBrush = Avalonia.Media.Brush.Parse("#000000");
 
@@ -223,7 +210,6 @@ namespace WindowsStickies.Views {
                     popup.Opened += (s, ev) => {
                         UpdateHyperlinkPopupLocale();
 
-                        // Прячем заголовок "Insert Hyperlink"
                         var titleBlock = popupBorder.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault(t => t.Name is "HyperlinkPopupTitle");
                         if (titleBlock is not null) {
                             titleBlock.IsVisible = false;
@@ -233,7 +219,6 @@ namespace WindowsStickies.Views {
                         foreach (var textBlock in popupBorder.GetVisualDescendants().OfType<TextBlock>())
                             textBlock.Foreground = Avalonia.Media.Brushes.Black;
 
-                        // Находим надписи "Text" и "URL" над текстовыми полями и скрываем их
                         var externalTextBlocks = popupBorder.GetVisualDescendants().OfType<TextBlock>().Where(tb => {
                             var parent = tb.Parent;
                             while (parent is not null) {
@@ -251,7 +236,6 @@ namespace WindowsStickies.Views {
                             }
                         }
 
-                        // Стилизация текстовых полей ввода
                         foreach (var textBox in popupBorder.GetVisualDescendants().OfType<TextBox>()) {
                             textBox.Foreground = Avalonia.Media.Brushes.Black;
                             textBox.Background = Avalonia.Media.Brushes.White;
@@ -269,9 +253,13 @@ namespace WindowsStickies.Views {
                             }
                         }
 
-                        // Стилизация кнопок
                         foreach (var button in popupBorder.GetVisualDescendants().OfType<Button>()) {
                             button.Foreground = Avalonia.Media.Brushes.Black;
+
+                            if (button.Name is "HyperlinkDeleteButton") {
+                                button.Click -= PopupRemove_Click;
+                                button.Click += PopupRemove_Click;
+                            }
 
                             button.ApplyTemplate();
                             var presenter = button.GetVisualDescendants().OfType<Avalonia.Controls.Presenters.ContentPresenter>().FirstOrDefault();
@@ -295,6 +283,44 @@ namespace WindowsStickies.Views {
                     };
                 }
             }
+        }
+
+        private void PopupRemove_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
+            if (sender is Button btn)
+                btn.IsVisible = false;
+            WiggleCursorToFixCache();
+        }
+
+        private void WiggleCursorToFixCache() {
+            // Запускаем асинхронно, чтобы библиотека успела закончить удаление ссылки
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => {
+                try {
+                    var pos = Editor.FlowDocument.Selection.Start;
+                    var len = Editor.FlowDocument.Selection.Length;
+                    
+                    // Имитируем микро-движение курсора, чтобы заставить библиотеку пересчитать кэш ссылок
+                    if (pos > 0)
+                        Editor.FlowDocument.Select(pos - 1, 0);
+                    else Editor.FlowDocument.Select(pos + 1, 0);
+                    
+                    Editor.FlowDocument.Select(pos, len);
+                }
+                catch { }
+            });
+        }
+
+        private bool IsCursorOnHyperlink() {
+            var method = Editor.FlowDocument.GetType().GetMethod(
+                "GetHyperlinkAtSelection", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            );
+            
+            if (method is not null) {
+                var hyperlink = method.Invoke(Editor.FlowDocument, null);
+                return hyperlink is not null;
+            }
+            
+            return false;
         }
     }
 }
