@@ -22,7 +22,18 @@ public partial class SessionService : ObservableObject {
     private ObservableCollection<StickyModel> _activeStickies = new();
     #endregion
 
+    private Avalonia.Threading.DispatcherTimer _saveTimer;
+    private bool _isSavePending;
+
     public SessionService() {
+        _saveTimer = new Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _saveTimer.Tick += (s, e) => {
+            _saveTimer.Stop();
+            if (_isSavePending) {
+                Save(true);
+            }
+        };
+
         PropertyChanged += (s, e) => Save();
         ActiveStickies.CollectionChanged += (s, e) => {
             if (e.NewItems is not null)
@@ -72,16 +83,26 @@ public partial class SessionService : ObservableObject {
         return newSession;
     }
 
-    public void Save() {
-        try {
-            var copy = System.Linq.Enumerable.ToList(ActiveStickies);
-            var dataToSave = new { ActiveStickies = copy };
-            var json = JsonSerializer.Serialize(dataToSave, new JsonSerializerOptions { WriteIndented = true });
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
-            File.WriteAllText(Path, json);
+    public void Save(bool force = false) {
+        if (force) {
+            _saveTimer?.Stop();
+            _isSavePending = false;
+
+            try {
+                var copy = System.Linq.Enumerable.ToList(ActiveStickies);
+                var dataToSave = new { ActiveStickies = copy };
+                var json = JsonSerializer.Serialize(dataToSave, new JsonSerializerOptions { WriteIndented = true });
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
+                File.WriteAllText(Path, json);
+            }
+            catch (Exception ex) {
+                Debug.WriteLine(ex);
+            }
         }
-        catch (Exception ex) {
-            Debug.WriteLine(ex);
+        else {
+            _isSavePending = true;
+            if (_saveTimer is not null && !_saveTimer.IsEnabled)
+                _saveTimer.Start();
         }
     }
 }

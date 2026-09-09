@@ -22,9 +22,9 @@ public partial class MainWindow : Window {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             this.Opened += (s, e) => {
                 if (DataContext is ViewModels.MainViewModel vm) {
-                    Position = new Avalonia.PixelPoint((int)vm.Model.X, (int)vm.Model.Y);
-                    Width = vm.Model.Width;
-                    Height = vm.Model.Height;
+                    Position = new Avalonia.PixelPoint((int)vm.StickyModel.X, (int)vm.StickyModel.Y);
+                    Width = vm.StickyModel.Width;
+                    Height = vm.StickyModel.Height;
                 }
                 
                 ApplyCornerPreference();
@@ -44,8 +44,8 @@ public partial class MainWindow : Window {
                 return;
 
             if (DataContext is ViewModels.MainViewModel vm) {
-                vm.Model.X = Position.X;
-                vm.Model.Y = Position.Y;
+                vm.StickyModel.X = Position.X;
+                vm.StickyModel.Y = Position.Y;
                 _saveTimer.Stop();
                 _saveTimer.Start();
             }
@@ -56,8 +56,8 @@ public partial class MainWindow : Window {
                 return;
 
             if (DataContext is ViewModels.MainViewModel vm) {
-                vm.Model.Width = Width;
-                vm.Model.Height = Height;
+                vm.StickyModel.Width = Width;
+                vm.StickyModel.Height = Height;
                 _saveTimer.Stop();
                 _saveTimer.Start();
             }
@@ -65,7 +65,8 @@ public partial class MainWindow : Window {
 
         Closed += (s, e) => {
             if (DataContext is ViewModels.MainViewModel vm) {
-                Services.SessionService.Instance.ActiveStickies.Remove(vm.Model);
+                Services.SessionService.Instance.ActiveStickies.Remove(vm.StickyModel);
+                Services.SessionService.Instance.Save(true);
             }
         };
     }

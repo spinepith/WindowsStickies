@@ -7,10 +7,10 @@ namespace WindowsStickies.ViewModels;
 
 public partial class MainViewModel : ViewModelBase {
     public TitleBarViewModel TitleBar { get; }
-    public Models.StickyModel Model { get; }
+    public Models.StickyModel StickyModel { get; }
 
     public MainViewModel(Models.StickyModel model) {
-        Model = model;
+        StickyModel = model;
         TitleBar = new TitleBarViewModel(model);
     }
 }

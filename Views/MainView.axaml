@@ -2,12 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avrtb="using:AvRichTextBox"
+             xmlns:vm="using:WindowsStickies.ViewModels"
              x:Class="WindowsStickies.Views.MainView"
+             x:DataType="vm:MainViewModel"
              mc:Ignorable="d"
-             d:DesignWidth="600"
-             d:DesignHeight="450"
+             d:DesignWidth="480"
+             d:DesignHeight="480"
              Background="White">
 
-    
+    <avrtb:RichTextBox x:Name="Editor" Zoom="1" Foreground="Black" CaretBrush="Black" BorderBrush="Transparent" Margin="0, 14, 0, 0" />
 
 </ContentPage>
