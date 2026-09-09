@@ -117,6 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ContextMenu_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="ContextMenu_Cut" xml:space="preserve">
+    <value>Cut</value>
+  </data>
+  <data name="ContextMenu_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ContextMenu_EditHyperlink" xml:space="preserve">
+    <value>Edit Hyperlink</value>
+  </data>
+  <data name="ContextMenu_InsertHyperlink" xml:space="preserve">
+    <value>Insert Hyperlink</value>
+  </data>
+  <data name="ContextMenu_Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="ContextMenu_PasteWithoutFormatting" xml:space="preserve">
+    <value>Paste Without Formatting</value>
+  </data>
+  <data name="ContextMenu_RemoveHyperlink" xml:space="preserve">
+    <value>Remove Hyperlink</value>
+  </data>
   <data name="Menu_About" xml:space="preserve">
     <value>About</value>
   </data>
@@ -192,8 +216,14 @@
   <data name="Menu_Font_Decrease" xml:space="preserve">
     <value>Decrease Size</value>
   </data>
+  <data name="Menu_Font_DecreaseAll" xml:space="preserve">
+    <value>Decrease All</value>
+  </data>
   <data name="Menu_Font_Increase" xml:space="preserve">
     <value>Increase Size</value>
+  </data>
+  <data name="Menu_Font_IncreaseAll" xml:space="preserve">
+    <value>Increase All</value>
   </data>
   <data name="Menu_Font_Italic" xml:space="preserve">
     <value>Italic</value>
@@ -213,7 +243,19 @@
   <data name="Menu_NewSticky" xml:space="preserve">
     <value>New Sticky</value>
   </data>
+  <data name="Menu_Edit_PasteWithoutFormatting" xml:space="preserve">
+    <value>Paste Without Formatting</value>
+  </data>
   <data name="Version" xml:space="preserve">
     <value>Version</value>
+  </data>
+  <data name="HyperlinkMenu_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="HyperlinkMenu_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="HyperlinkMenu_Placeholder" xml:space="preserve">
+    <value>Text</value>
   </data>
 </root>

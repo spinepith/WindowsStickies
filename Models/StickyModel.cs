@@ -26,5 +26,8 @@ public partial class StickyModel : ObservableObject {
     
 
     [ObservableProperty]
-    private string _text = "";
+    private double _zoom = 1.0;
+
+    [ObservableProperty]
+    private string _text = string.Empty;
 }

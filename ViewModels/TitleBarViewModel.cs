@@ -11,6 +11,8 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     public string PinIconPath => IsTopmost ? "/Assets/pinned.svg" : "/Assets/pin.svg";
     public Services.SettingsService Settings => Services.SettingsService.Instance;
 
+    public System.Action<string>? EditorAction;
+
     public ObservableCollection<LanguageItem> AvailableLanguages { get; }
 
     public Models.StickyModel Model { get; }
@@ -52,12 +54,61 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     #endregion
 
     #region EDIT
+    [RelayCommand]
+    private void DeleteText() {
+        EditorAction?.Invoke("DeleteText");
+    }
+
+    [RelayCommand]
+    private void Find() {
+
+    }
     #endregion
 
     #region FONT
+    [RelayCommand]
+    private void OpenFontsMenu() {
+        
+    }
+
+    [RelayCommand]
+    private void StrikethroughFont() {
+        EditorAction?.Invoke(nameof(StrikethroughFont));
+    }
+
+    [RelayCommand]
+    private void IncreaseFontSize() {
+        EditorAction?.Invoke(nameof(IncreaseFontSize));
+    }
+
+    [RelayCommand]
+    private void DecreaseFontSize() {
+        EditorAction?.Invoke(nameof(DecreaseFontSize));
+    }
+
+    [RelayCommand]
+    private void ZoomIn() {
+        if (Model.Zoom < 5.0)
+            Model.Zoom += 0.1;
+    }
+
+    [RelayCommand]
+    private void ZoomOut() {
+        if (Model.Zoom > 0.3)
+            Model.Zoom -= 0.1;
+    }
+
+    [RelayCommand]
+    private void FontColor() {
+
+    }
     #endregion
 
     #region COLOR
+    [RelayCommand]
+    private void Color() {
+
+    }
     #endregion
 
     #region LANGUAGE

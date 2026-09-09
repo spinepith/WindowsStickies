@@ -61,6 +61,105 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Copy.
+        /// </summary>
+        public static string ContextMenu_Copy {
+            get {
+                return ResourceManager.GetString("ContextMenu_Copy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Cut.
+        /// </summary>
+        public static string ContextMenu_Cut {
+            get {
+                return ResourceManager.GetString("ContextMenu_Cut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Delete.
+        /// </summary>
+        public static string ContextMenu_Delete {
+            get {
+                return ResourceManager.GetString("ContextMenu_Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Edit Hyperlink.
+        /// </summary>
+        public static string ContextMenu_EditHyperlink {
+            get {
+                return ResourceManager.GetString("ContextMenu_EditHyperlink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Insert Hyperlink.
+        /// </summary>
+        public static string ContextMenu_InsertHyperlink {
+            get {
+                return ResourceManager.GetString("ContextMenu_InsertHyperlink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Paste.
+        /// </summary>
+        public static string ContextMenu_Paste {
+            get {
+                return ResourceManager.GetString("ContextMenu_Paste", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Paste Without Formatting.
+        /// </summary>
+        public static string ContextMenu_PasteWithoutFormatting {
+            get {
+                return ResourceManager.GetString("ContextMenu_PasteWithoutFormatting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Remove Hyperlink.
+        /// </summary>
+        public static string ContextMenu_RemoveHyperlink {
+            get {
+                return ResourceManager.GetString("ContextMenu_RemoveHyperlink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Cancel.
+        /// </summary>
+        public static string HyperlinkMenu_Cancel {
+            get {
+                return ResourceManager.GetString("HyperlinkMenu_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Text.
+        /// </summary>
+        public static string HyperlinkMenu_Placeholder {
+            get {
+                return ResourceManager.GetString("HyperlinkMenu_Placeholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Remove.
+        /// </summary>
+        public static string HyperlinkMenu_Remove {
+            get {
+                return ResourceManager.GetString("HyperlinkMenu_Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на About.
         /// </summary>
         public static string Menu_About {
@@ -205,6 +304,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Paste Without Formatting.
+        /// </summary>
+        public static string Menu_Edit_PasteWithoutFormatting {
+            get {
+                return ResourceManager.GetString("Menu_Edit_PasteWithoutFormatting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Select All.
         /// </summary>
         public static string Menu_Edit_SelectAll {
@@ -286,11 +394,29 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Decrease All.
+        /// </summary>
+        public static string Menu_Font_DecreaseAll {
+            get {
+                return ResourceManager.GetString("Menu_Font_DecreaseAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Increase Size.
         /// </summary>
         public static string Menu_Font_Increase {
             get {
                 return ResourceManager.GetString("Menu_Font_Increase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Increase All.
+        /// </summary>
+        public static string Menu_Font_IncreaseAll {
+            get {
+                return ResourceManager.GetString("Menu_Font_IncreaseAll", resourceCulture);
             }
         }
         

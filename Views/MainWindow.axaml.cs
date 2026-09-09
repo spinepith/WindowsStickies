@@ -20,7 +20,7 @@ public partial class MainWindow : Window {
         };
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-            this.Opened += (s, e) => {
+            Opened += (s, e) => {
                 if (DataContext is ViewModels.MainViewModel vm) {
                     Position = new Avalonia.PixelPoint((int)vm.StickyModel.X, (int)vm.StickyModel.Y);
                     Width = vm.StickyModel.Width;

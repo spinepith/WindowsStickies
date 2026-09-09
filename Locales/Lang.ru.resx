@@ -117,6 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ContextMenu_Copy" xml:space="preserve">
+    <value>Копировать</value>
+  </data>
+  <data name="ContextMenu_Cut" xml:space="preserve">
+    <value>Вырезать</value>
+  </data>
+  <data name="ContextMenu_Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="ContextMenu_EditHyperlink" xml:space="preserve">
+    <value>Редактировать гиперссылку</value>
+  </data>
+  <data name="ContextMenu_InsertHyperlink" xml:space="preserve">
+    <value>Вставить гиперссылку</value>
+  </data>
+  <data name="ContextMenu_Paste" xml:space="preserve">
+    <value>Вставить</value>
+  </data>
+  <data name="ContextMenu_PasteWithoutFormatting" xml:space="preserve">
+    <value>Вставить без форматирования</value>
+  </data>
+  <data name="ContextMenu_RemoveHyperlink" xml:space="preserve">
+    <value>Удалить гиперссылку</value>
+  </data>
   <data name="Menu_About" xml:space="preserve">
     <value>О программе</value>
   </data>
@@ -192,8 +216,14 @@
   <data name="Menu_Font_Decrease" xml:space="preserve">
     <value>Уменьшить</value>
   </data>
+  <data name="Menu_Font_DecreaseAll" xml:space="preserve">
+    <value>Уменьшить все</value>
+  </data>
   <data name="Menu_Font_Increase" xml:space="preserve">
     <value>Увеличить</value>
+  </data>
+  <data name="Menu_Font_IncreaseAll" xml:space="preserve">
+    <value>Увеличить все</value>
   </data>
   <data name="Menu_Font_Italic" xml:space="preserve">
     <value>Курсив</value>
@@ -213,7 +243,19 @@
   <data name="Menu_NewSticky" xml:space="preserve">
     <value>Новая записка</value>
   </data>
+  <data name="Menu_Edit_PasteWithoutFormatting" xml:space="preserve">
+    <value>Вставить без форматирования</value>
+  </data>
   <data name="Version" xml:space="preserve">
     <value>Версия</value>
+  </data>
+  <data name="HyperlinkMenu_Cancel" xml:space="preserve">
+    <value>Отменить</value>
+  </data>
+  <data name="HyperlinkMenu_Remove" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="HyperlinkMenu_Placeholder" xml:space="preserve">
+    <value>Текст</value>
   </data>
 </root>

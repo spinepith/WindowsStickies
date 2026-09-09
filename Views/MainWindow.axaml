@@ -21,20 +21,16 @@
         WindowState="{CompiledBinding TitleBar.WindowState, Mode=TwoWay}">
 
     <Window.KeyBindings>
-        <KeyBinding Gesture="Ctrl+N" Command="" />
-        <KeyBinding Gesture="Ctrl+X" Command="" />
-        <KeyBinding Gesture="Ctrl+C" Command="" />
-        <KeyBinding Gesture="Ctrl+V" Command="" />
-        <KeyBinding Gesture="Ctrl+D" Command="" />
-        <KeyBinding Gesture="Ctrl+A" Command="" />
-        <KeyBinding Gesture="Ctrl+F" Command="" />
-        <KeyBinding Gesture="Ctrl+T" Command="" />
-        <KeyBinding Gesture="Ctrl+B" Command="" />
-        <KeyBinding Gesture="Ctrl+I" Command="" />
-        <KeyBinding Gesture="Ctrl+U" Command="" />
-        <KeyBinding Gesture="Ctrl+OemPlus" Command="" />
-        <KeyBinding Gesture="Ctrl+OemMinus" Command="" />
-        <KeyBinding Gesture="Ctrl+Shift+C" Command="" />
+        <KeyBinding Gesture="Ctrl+N" Command="{CompiledBinding TitleBar.NewStickyCommand}" />
+        <KeyBinding Gesture="Ctrl+D" Command="{CompiledBinding TitleBar.DeleteTextCommand}" />
+        <KeyBinding Gesture="Ctrl+F" Command="{CompiledBinding TitleBar.FindCommand}" />
+        <KeyBinding Gesture="Ctrl+T" Command="{CompiledBinding TitleBar.StrikethroughFontCommand}" />
+        <KeyBinding Gesture="Ctrl+shift+T" Command="{CompiledBinding TitleBar.OpenFontsMenuCommand}" />
+        <KeyBinding Gesture="Ctrl+OemPlus" Command="{CompiledBinding TitleBar.IncreaseFontSizeCommand}" />
+        <KeyBinding Gesture="Ctrl+OemMinus" Command="{CompiledBinding TitleBar.DecreaseFontSizeCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command="{CompiledBinding TitleBar.ZoomInCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+OemMinus" Command="{CompiledBinding TitleBar.ZoomOutCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+C" Command="{CompiledBinding TitleBar.ColorCommand}" />
     </Window.KeyBindings>
 
     <Grid RowDefinitions="16, *">

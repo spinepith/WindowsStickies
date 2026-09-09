@@ -11,6 +11,6 @@
              d:DesignHeight="480"
              Background="White">
 
-    <avrtb:RichTextBox x:Name="Editor" Zoom="1" Foreground="Black" CaretBrush="Black" BorderBrush="Transparent" Margin="0, 14, 0, 0" />
+    <avrtb:RichTextBox x:Name="Editor" Foreground="Black" CaretBrush="Black" BorderBrush="Transparent" Margin="0, 14, 0, 0" />
 
 </ContentPage>
