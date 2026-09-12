@@ -8,6 +8,8 @@ using CommunityToolkit.Mvvm.Messaging;
 namespace WindowsStickies.ViewModels;
 
 public partial class TitleBarViewModel : BaseTitleBarViewModel {
+    private MainViewModel? _mainViewModel;
+
     public string PinIconPath => IsTopmost ? "/Assets/pinned.svg" : "/Assets/pin.svg";
     public Services.SettingsService Settings => Services.SettingsService.Instance;
 
@@ -17,8 +19,10 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     public Models.StickyModel Model { get; }
 
-    public TitleBarViewModel(Models.StickyModel model) {
+
+    public TitleBarViewModel(Models.StickyModel model, MainViewModel? mainViewModel = null) {
         Model = model;
+        _mainViewModel = mainViewModel;
         IsTopmost = model.IsTopmost;
 
         AvailableLanguages = new ObservableCollection<LanguageItem> {
@@ -51,29 +55,68 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     #endregion
 
     #region FILE
+    [RelayCommand]
+    private void ImportText() {
+
+    }
+
+    [RelayCommand]
+    private void ExportText() {
+
+    }
+
+    [RelayCommand]
+    private void RuledLines() {
+
+    }
     #endregion
 
     #region EDIT
     [RelayCommand]
+    private void Cut() {
+
+    }
+
+    [RelayCommand]
+    private void Copy() {
+
+    }
+
+    [RelayCommand]
+    private void Paste() {
+
+    }
+
+    [RelayCommand]
+    private void PasteWithoutFormatting() {
+
+    }
+
+    [RelayCommand]
     private void DeleteText() {
-        EditorAction?.Invoke("DeleteText");
+
+    }
+
+    [RelayCommand]
+    private void SelectAll() {
+
     }
 
     [RelayCommand]
     private void Find() {
-
+        WeakReferenceMessenger.Default.Send(new Models.OpenFindTextMessage { SourceViewModel = _mainViewModel });
     }
     #endregion
 
     #region FONT
     [RelayCommand]
-    private void OpenFontsMenu() {
-        
+    private void ShowAllFonts() {
+
     }
 
     [RelayCommand]
-    private void StrikethroughFont() {
-        EditorAction?.Invoke(nameof(StrikethroughFont));
+    private void SetFontStyle() {
+
     }
 
     [RelayCommand]
@@ -88,7 +131,7 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     [RelayCommand]
     private void ZoomIn() {
-        if (Model.Zoom < 5.0)
+        if (Model.Zoom < 4.0)
             Model.Zoom += 0.1;
     }
 
@@ -106,7 +149,7 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     #region COLOR
     [RelayCommand]
-    private void Color() {
+    private void BackgroundColor() {
 
     }
     #endregion

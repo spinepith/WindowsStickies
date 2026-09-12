@@ -22,7 +22,7 @@ namespace WindowsStickies.Locales {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Lang {
+    internal class Lang {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace WindowsStickies.Locales {
         ///   Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WindowsStickies.Locales.Lang", typeof(Lang).Assembly);
@@ -51,7 +51,7 @@ namespace WindowsStickies.Locales {
         ///   обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Copy.
         /// </summary>
-        public static string ContextMenu_Copy {
+        internal static string ContextMenu_Copy {
             get {
                 return ResourceManager.GetString("ContextMenu_Copy", resourceCulture);
             }
@@ -72,43 +72,34 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Cut.
         /// </summary>
-        public static string ContextMenu_Cut {
+        internal static string ContextMenu_Cut {
             get {
                 return ResourceManager.GetString("ContextMenu_Cut", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Delete.
-        /// </summary>
-        public static string ContextMenu_Delete {
-            get {
-                return ResourceManager.GetString("ContextMenu_Delete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на Edit Hyperlink.
         /// </summary>
-        public static string ContextMenu_EditHyperlink {
+        internal static string ContextMenu_EditHyperlink {
             get {
                 return ResourceManager.GetString("ContextMenu_EditHyperlink", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Insert Hyperlink.
+        ///   Ищет локализованную строку, похожую на Hyperlink.
         /// </summary>
-        public static string ContextMenu_InsertHyperlink {
+        internal static string ContextMenu_Hyperlink {
             get {
-                return ResourceManager.GetString("ContextMenu_InsertHyperlink", resourceCulture);
+                return ResourceManager.GetString("ContextMenu_Hyperlink", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Ищет локализованную строку, похожую на Paste.
         /// </summary>
-        public static string ContextMenu_Paste {
+        internal static string ContextMenu_Paste {
             get {
                 return ResourceManager.GetString("ContextMenu_Paste", resourceCulture);
             }
@@ -117,25 +108,25 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Paste Without Formatting.
         /// </summary>
-        public static string ContextMenu_PasteWithoutFormatting {
+        internal static string ContextMenu_PasteWithoutFormatting {
             get {
                 return ResourceManager.GetString("ContextMenu_PasteWithoutFormatting", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Remove Hyperlink.
+        ///   Ищет локализованную строку, похожую на Find Next.
         /// </summary>
-        public static string ContextMenu_RemoveHyperlink {
+        internal static string FindMenu_FindNext {
             get {
-                return ResourceManager.GetString("ContextMenu_RemoveHyperlink", resourceCulture);
+                return ResourceManager.GetString("FindMenu_FindNext", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Ищет локализованную строку, похожую на Cancel.
         /// </summary>
-        public static string HyperlinkMenu_Cancel {
+        internal static string HyperlinkMenu_Cancel {
             get {
                 return ResourceManager.GetString("HyperlinkMenu_Cancel", resourceCulture);
             }
@@ -144,7 +135,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Text.
         /// </summary>
-        public static string HyperlinkMenu_Placeholder {
+        internal static string HyperlinkMenu_Placeholder {
             get {
                 return ResourceManager.GetString("HyperlinkMenu_Placeholder", resourceCulture);
             }
@@ -153,7 +144,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Remove.
         /// </summary>
-        public static string HyperlinkMenu_Remove {
+        internal static string HyperlinkMenu_Remove {
             get {
                 return ResourceManager.GetString("HyperlinkMenu_Remove", resourceCulture);
             }
@@ -162,7 +153,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на About.
         /// </summary>
-        public static string Menu_About {
+        internal static string Menu_About {
             get {
                 return ResourceManager.GetString("Menu_About", resourceCulture);
             }
@@ -171,7 +162,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Change Border.
         /// </summary>
-        public static string Menu_ChangeBorder {
+        internal static string Menu_ChangeBorder {
             get {
                 return ResourceManager.GetString("Menu_ChangeBorder", resourceCulture);
             }
@@ -180,7 +171,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Color.
         /// </summary>
-        public static string Menu_Color {
+        internal static string Menu_Color {
             get {
                 return ResourceManager.GetString("Menu_Color", resourceCulture);
             }
@@ -189,7 +180,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Black.
         /// </summary>
-        public static string Menu_Color_Black {
+        internal static string Menu_Color_Black {
             get {
                 return ResourceManager.GetString("Menu_Color_Black", resourceCulture);
             }
@@ -198,16 +189,25 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Blue.
         /// </summary>
-        public static string Menu_Color_Blue {
+        internal static string Menu_Color_Blue {
             get {
                 return ResourceManager.GetString("Menu_Color_Blue", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Choose Color.
+        /// </summary>
+        internal static string Menu_Color_ChooseColor {
+            get {
+                return ResourceManager.GetString("Menu_Color_ChooseColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Gray.
         /// </summary>
-        public static string Menu_Color_Gray {
+        internal static string Menu_Color_Gray {
             get {
                 return ResourceManager.GetString("Menu_Color_Gray", resourceCulture);
             }
@@ -216,7 +216,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Green.
         /// </summary>
-        public static string Menu_Color_Green {
+        internal static string Menu_Color_Green {
             get {
                 return ResourceManager.GetString("Menu_Color_Green", resourceCulture);
             }
@@ -225,7 +225,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Pink.
         /// </summary>
-        public static string Menu_Color_Pink {
+        internal static string Menu_Color_Pink {
             get {
                 return ResourceManager.GetString("Menu_Color_Pink", resourceCulture);
             }
@@ -234,7 +234,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на White.
         /// </summary>
-        public static string Menu_Color_White {
+        internal static string Menu_Color_White {
             get {
                 return ResourceManager.GetString("Menu_Color_White", resourceCulture);
             }
@@ -243,7 +243,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Yellow.
         /// </summary>
-        public static string Menu_Color_Yellow {
+        internal static string Menu_Color_Yellow {
             get {
                 return ResourceManager.GetString("Menu_Color_Yellow", resourceCulture);
             }
@@ -252,7 +252,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Edit.
         /// </summary>
-        public static string Menu_Edit {
+        internal static string Menu_Edit {
             get {
                 return ResourceManager.GetString("Menu_Edit", resourceCulture);
             }
@@ -261,7 +261,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Copy.
         /// </summary>
-        public static string Menu_Edit_Copy {
+        internal static string Menu_Edit_Copy {
             get {
                 return ResourceManager.GetString("Menu_Edit_Copy", resourceCulture);
             }
@@ -270,7 +270,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Cut.
         /// </summary>
-        public static string Menu_Edit_Cut {
+        internal static string Menu_Edit_Cut {
             get {
                 return ResourceManager.GetString("Menu_Edit_Cut", resourceCulture);
             }
@@ -279,7 +279,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Delete.
         /// </summary>
-        public static string Menu_Edit_Delete {
+        internal static string Menu_Edit_Delete {
             get {
                 return ResourceManager.GetString("Menu_Edit_Delete", resourceCulture);
             }
@@ -288,7 +288,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Find.
         /// </summary>
-        public static string Menu_Edit_Find {
+        internal static string Menu_Edit_Find {
             get {
                 return ResourceManager.GetString("Menu_Edit_Find", resourceCulture);
             }
@@ -297,7 +297,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Paste.
         /// </summary>
-        public static string Menu_Edit_Paste {
+        internal static string Menu_Edit_Paste {
             get {
                 return ResourceManager.GetString("Menu_Edit_Paste", resourceCulture);
             }
@@ -306,7 +306,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Paste Without Formatting.
         /// </summary>
-        public static string Menu_Edit_PasteWithoutFormatting {
+        internal static string Menu_Edit_PasteWithoutFormatting {
             get {
                 return ResourceManager.GetString("Menu_Edit_PasteWithoutFormatting", resourceCulture);
             }
@@ -315,7 +315,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Select All.
         /// </summary>
-        public static string Menu_Edit_SelectAll {
+        internal static string Menu_Edit_SelectAll {
             get {
                 return ResourceManager.GetString("Menu_Edit_SelectAll", resourceCulture);
             }
@@ -324,7 +324,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на File.
         /// </summary>
-        public static string Menu_File {
+        internal static string Menu_File {
             get {
                 return ResourceManager.GetString("Menu_File", resourceCulture);
             }
@@ -333,7 +333,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Export Text.
         /// </summary>
-        public static string Menu_File_Export {
+        internal static string Menu_File_Export {
             get {
                 return ResourceManager.GetString("Menu_File_Export", resourceCulture);
             }
@@ -342,7 +342,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Import Text.
         /// </summary>
-        public static string Menu_File_Import {
+        internal static string Menu_File_Import {
             get {
                 return ResourceManager.GetString("Menu_File_Import", resourceCulture);
             }
@@ -351,7 +351,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Ruled Lines.
         /// </summary>
-        public static string Menu_File_RuledLines {
+        internal static string Menu_File_RuledLines {
             get {
                 return ResourceManager.GetString("Menu_File_RuledLines", resourceCulture);
             }
@@ -360,7 +360,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Font.
         /// </summary>
-        public static string Menu_Font {
+        internal static string Menu_Font {
             get {
                 return ResourceManager.GetString("Menu_Font", resourceCulture);
             }
@@ -369,7 +369,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Bold.
         /// </summary>
-        public static string Menu_Font_Bold {
+        internal static string Menu_Font_Bold {
             get {
                 return ResourceManager.GetString("Menu_Font_Bold", resourceCulture);
             }
@@ -378,7 +378,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Color.
         /// </summary>
-        public static string Menu_Font_Color {
+        internal static string Menu_Font_Color {
             get {
                 return ResourceManager.GetString("Menu_Font_Color", resourceCulture);
             }
@@ -387,7 +387,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Decrease Size.
         /// </summary>
-        public static string Menu_Font_Decrease {
+        internal static string Menu_Font_Decrease {
             get {
                 return ResourceManager.GetString("Menu_Font_Decrease", resourceCulture);
             }
@@ -396,16 +396,25 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Decrease All.
         /// </summary>
-        public static string Menu_Font_DecreaseAll {
+        internal static string Menu_Font_DecreaseAll {
             get {
                 return ResourceManager.GetString("Menu_Font_DecreaseAll", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Hyperlink.
+        /// </summary>
+        internal static string Menu_Font_Hyperlink {
+            get {
+                return ResourceManager.GetString("Menu_Font_Hyperlink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Increase Size.
         /// </summary>
-        public static string Menu_Font_Increase {
+        internal static string Menu_Font_Increase {
             get {
                 return ResourceManager.GetString("Menu_Font_Increase", resourceCulture);
             }
@@ -414,7 +423,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Increase All.
         /// </summary>
-        public static string Menu_Font_IncreaseAll {
+        internal static string Menu_Font_IncreaseAll {
             get {
                 return ResourceManager.GetString("Menu_Font_IncreaseAll", resourceCulture);
             }
@@ -423,7 +432,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Italic.
         /// </summary>
-        public static string Menu_Font_Italic {
+        internal static string Menu_Font_Italic {
             get {
                 return ResourceManager.GetString("Menu_Font_Italic", resourceCulture);
             }
@@ -432,7 +441,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Show Fonts.
         /// </summary>
-        public static string Menu_Font_ShowFonts {
+        internal static string Menu_Font_ShowFonts {
             get {
                 return ResourceManager.GetString("Menu_Font_ShowFonts", resourceCulture);
             }
@@ -441,7 +450,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Strikethrough.
         /// </summary>
-        public static string Menu_Font_Strikethrough {
+        internal static string Menu_Font_Strikethrough {
             get {
                 return ResourceManager.GetString("Menu_Font_Strikethrough", resourceCulture);
             }
@@ -450,7 +459,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Underline.
         /// </summary>
-        public static string Menu_Font_Underline {
+        internal static string Menu_Font_Underline {
             get {
                 return ResourceManager.GetString("Menu_Font_Underline", resourceCulture);
             }
@@ -459,7 +468,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Language.
         /// </summary>
-        public static string Menu_Language {
+        internal static string Menu_Language {
             get {
                 return ResourceManager.GetString("Menu_Language", resourceCulture);
             }
@@ -468,7 +477,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на New Sticky.
         /// </summary>
-        public static string Menu_NewSticky {
+        internal static string Menu_NewSticky {
             get {
                 return ResourceManager.GetString("Menu_NewSticky", resourceCulture);
             }
@@ -477,7 +486,7 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Version.
         /// </summary>
-        public static string Version {
+        internal static string Version {
             get {
                 return ResourceManager.GetString("Version", resourceCulture);
             }

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Windows.Threading;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -22,11 +23,11 @@ public partial class SessionService : ObservableObject {
     private ObservableCollection<StickyModel> _activeStickies = new();
     #endregion
 
-    private Avalonia.Threading.DispatcherTimer _saveTimer;
+    private DispatcherTimer _saveTimer;
     private bool _isSavePending;
 
     public SessionService() {
-        _saveTimer = new Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _saveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _saveTimer.Tick += (s, e) => {
             _saveTimer.Stop();
             if (_isSavePending) {

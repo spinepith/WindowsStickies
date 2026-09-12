@@ -123,23 +123,14 @@
   <data name="ContextMenu_Cut" xml:space="preserve">
     <value>Вырезать</value>
   </data>
-  <data name="ContextMenu_Delete" xml:space="preserve">
-    <value>Удалить</value>
-  </data>
   <data name="ContextMenu_EditHyperlink" xml:space="preserve">
     <value>Редактировать гиперссылку</value>
   </data>
-  <data name="ContextMenu_InsertHyperlink" xml:space="preserve">
-    <value>Вставить гиперссылку</value>
+  <data name="ContextMenu_Hyperlink" xml:space="preserve">
+    <value>Гиперссылка</value>
   </data>
   <data name="ContextMenu_Paste" xml:space="preserve">
     <value>Вставить</value>
-  </data>
-  <data name="ContextMenu_PasteWithoutFormatting" xml:space="preserve">
-    <value>Вставить без форматирования</value>
-  </data>
-  <data name="ContextMenu_RemoveHyperlink" xml:space="preserve">
-    <value>Удалить гиперссылку</value>
   </data>
   <data name="Menu_About" xml:space="preserve">
     <value>О программе</value>
@@ -257,5 +248,17 @@
   </data>
   <data name="HyperlinkMenu_Placeholder" xml:space="preserve">
     <value>Текст</value>
+  </data>
+  <data name="Menu_Font_Hyperlink" xml:space="preserve">
+    <value>Гиперссылка</value>
+  </data>
+  <data name="Menu_Color_ChooseColor" xml:space="preserve">
+    <value>Выбрать цвет</value>
+  </data>
+  <data name="ContextMenu_PasteWithoutFormatting" xml:space="preserve">
+    <value>Вставить без форматирования</value>
+  </data>
+  <data name="FindMenu_FindNext" xml:space="preserve">
+    <value>Найти далее</value>
   </data>
 </root>

@@ -13,6 +13,6 @@ public class Localizer : INotifyPropertyChanged {
     
     public void SetLanguage(string languageCode) {
         CurrentCulture = new CultureInfo(languageCode);
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item"));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
     }
 }

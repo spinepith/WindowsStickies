@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+﻿using System.Windows;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,8 +11,9 @@ public partial class BaseTitleBarViewModel : ViewModelBase {
     private WindowState _windowState = WindowState.Normal;
 
     [RelayCommand]
-    private void Minimize() {
-        WindowState = WindowState.Minimized;
+    private void Minimize(Window? window) {
+        if (window != null)
+            window.WindowState = WindowState.Minimized;
     }
 
     [RelayCommand]

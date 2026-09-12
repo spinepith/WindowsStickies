@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="WindowsStickies.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:WindowsStickies.Views"
+             xmlns:locales="clr-namespace:WindowsStickies.Locales"
+             mc:Ignorable="d"
+             d:DesignHeight="480"
+             d:DesignWidth="480">
+
+    <RichTextBox Background="Transparent" FontSize="12" Foreground="Black" Padding="0, 2">
+        <RichTextBox.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="{Binding [ContextMenu_Cut], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Cut"/>
+                <MenuItem Header="{Binding [ContextMenu_Copy], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Copy"/>
+                <MenuItem Header="{Binding [ContextMenu_Paste], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Paste"/>
+                <MenuItem Header="{Binding [ContextMenu_PasteWithoutFormatting], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Paste"/>
+                <Separator/>
+                <MenuItem Header="{Binding [ContextMenu_Hyperlink], Source={x:Static locales:Localizer.Instance}}" Command="EditingCommands.ToggleInsert"/>
+            </ContextMenu>
+        </RichTextBox.ContextMenu>
+    </RichTextBox>
+
+</UserControl>
