@@ -12,7 +12,7 @@ public partial class BaseTitleBarViewModel : ViewModelBase {
 
     [RelayCommand]
     private void Minimize(Window? window) {
-        if (window != null)
+        if (window is not null)
             window.WindowState = WindowState.Minimized;
     }
 

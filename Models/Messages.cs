@@ -21,3 +21,13 @@ public class OpenColorPickerMessage {
 public class OpenFontPickerMessage {
     public ViewModels.MainViewModel? SourceViewModel { get; set; }
 }
+
+public class FindRequestMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public string SearchText { get; }
+
+    public FindRequestMessage(ViewModels.MainViewModel targetViewModel, string searchText) {
+        TargetViewModel = targetViewModel;
+        SearchText = searchText;
+    }
+}

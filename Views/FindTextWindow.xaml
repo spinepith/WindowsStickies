@@ -18,7 +18,7 @@
         WindowStartupLocation="CenterOwner">
 
     <shell:WindowChrome.WindowChrome>
-        <shell:WindowChrome CaptionHeight="16" ResizeBorderThickness="4" CornerRadius="0"/>
+        <shell:WindowChrome CaptionHeight="16" ResizeBorderThickness="0" CornerRadius="0"/>
     </shell:WindowChrome.WindowChrome>
 
     <Grid RowDefinitions="Auto, *">
@@ -27,8 +27,8 @@
 
         <Border Grid.Row="1" Padding="4">
             <Grid ColumnDefinitions="*, Auto" Margin="4">
-                <TextBox Grid.Column="0" x:Name="SearchTextBox" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="0, 0, 8, 0"/>
-                <Button Grid.Column="1" VerticalAlignment="Stretch" Content="{Binding [FindMenu_FindNext], Source={x:Static locales:Localizer.Instance}}"/>
+                <TextBox Grid.Column="0" x:Name="SearchTextBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="0, 0, 8, 0"/>
+                <Button Grid.Column="1" VerticalAlignment="Stretch" Command="{Binding FindNextCommand}" Content="{Binding [FindMenu_FindNext], Source={x:Static locales:Localizer.Instance}}" IsDefault="True"/>
             </Grid>
         </Border>
 

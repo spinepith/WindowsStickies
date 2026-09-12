@@ -58,7 +58,7 @@ public partial class SessionService : ObservableObject {
                 session.PropertyChanged += (s, e) => session.Save();
                 session.ActiveStickies.CollectionChanged += (s, e) => session.Save();
                 
-                if (session.ActiveStickies.Count == 0) {
+                if (session.ActiveStickies.Count is 0) {
                     var defaultSticky = new StickyModel();
                     defaultSticky.PropertyChanged += (sender, args) => session.Save();
                     session.ActiveStickies.Add(defaultSticky);

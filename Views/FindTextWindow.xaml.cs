@@ -31,7 +31,7 @@ namespace WindowsStickies.Views {
             };
 
             Services.SettingsService.Instance.PropertyChanged += (s, e) => {
-                if (e.PropertyName == nameof(Services.SettingsService.IsRoundedCorners))
+                if (e.PropertyName is nameof(Services.SettingsService.IsRoundedCorners))
                     ApplyCornerPreference();
             };
         }

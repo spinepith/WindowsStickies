@@ -10,7 +10,7 @@ namespace WindowsStickies.Styles {
 
         private CornerRadiusHelper() {
             Services.SettingsService.Instance.PropertyChanged += (s, e) => {
-                if (e.PropertyName == nameof(Services.SettingsService.IsRoundedCorners)) {
+                if (e.PropertyName is nameof(Services.SettingsService.IsRoundedCorners)) {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MenuItemRadius)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PopupRadius)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ButtonRadius)));

@@ -1,8 +1,10 @@
-using System;
 using System.Windows;
+
 using CommunityToolkit.Mvvm.Messaging;
+
 using WindowsStickies.ViewModels;
 using WindowsStickies.Views;
+
 
 namespace WindowsStickies.Services;
 
@@ -43,26 +45,26 @@ public class WindowService {
                 if (r._findTextWindow.DataContext is FindTextViewModel vm)
                     vm.TargetViewModel = m.SourceViewModel;
 
-                var newOwner = System.Linq.Enumerable.FirstOrDefault(
-                    Application.Current.Windows.OfType<MainWindow>(),
-                    w => w.DataContext == m.SourceViewModel);
+                var newOwner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
 
-                if (newOwner != null)
+                if (newOwner is not null) {
                     r._findTextWindow.Owner = newOwner;
+
+                    r._findTextWindow.Left = newOwner.Left + (newOwner.ActualWidth - r._findTextWindow.ActualWidth) / 2;
+                    r._findTextWindow.Top = newOwner.Top + (newOwner.ActualHeight - r._findTextWindow.ActualHeight) / 2;
+                }
 
                 r._findTextWindow.Activate();
                 return;
             }
 
-            var owner = System.Linq.Enumerable.FirstOrDefault(
-                Application.Current.Windows.OfType<MainWindow>(),
-                w => w.DataContext == m.SourceViewModel);
+            var owner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
 
             r._findTextWindow = new FindTextWindow {
                 Owner = owner,
                 DataContext = new FindTextViewModel(m.SourceViewModel)
             };
-            
+
             r._findTextWindow.Show();
         });
 
