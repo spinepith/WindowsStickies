@@ -74,3 +74,16 @@ public class ChangeHighlightColorMessage {
         NewColor = newColor;
     }
 }
+
+public class BackupSelectionMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public BackupSelectionMessage(ViewModels.MainViewModel targetViewModel) => TargetViewModel = targetViewModel;
+}
+public class RestoreSelectionMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public RestoreSelectionMessage(ViewModels.MainViewModel targetViewModel) => TargetViewModel = targetViewModel;
+}
+public class ClearSelectionBackupMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public ClearSelectionBackupMessage(ViewModels.MainViewModel targetViewModel) => TargetViewModel = targetViewModel;
+}

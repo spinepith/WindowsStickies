@@ -34,6 +34,9 @@ internal partial class ColorPickerViewModel : BaseTitleBarViewModel {
         _isApplied = false;
 
         if (TargetViewModel is not null) {
+            if (Mode == OpenColorPickerMessage.PickerMode.FontColor || Mode == OpenColorPickerMessage.PickerMode.HighlightColor)
+                WeakReferenceMessenger.Default.Send(new BackupSelectionMessage(TargetViewModel));
+
             string colorString = "#FF000000";
             
             if (Mode == OpenColorPickerMessage.PickerMode.FontColor)
@@ -65,23 +68,34 @@ internal partial class ColorPickerViewModel : BaseTitleBarViewModel {
 
         _isApplied = true;
 
-        if (Mode == OpenColorPickerMessage.PickerMode.FontColor)
-            WeakReferenceMessenger.Default.Send(new ChangeFontColorMessage(TargetViewModel, SelectedColor));
-
-        else if (Mode == OpenColorPickerMessage.PickerMode.HighlightColor)
-            WeakReferenceMessenger.Default.Send(new ChangeHighlightColorMessage(TargetViewModel, SelectedColor));
-
+        if (Mode == OpenColorPickerMessage.PickerMode.FontColor || Mode == OpenColorPickerMessage.PickerMode.HighlightColor)
+            WeakReferenceMessenger.Default.Send(new ClearSelectionBackupMessage(TargetViewModel));
         else if (Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
             TargetViewModel.StickyModel.BackgroundColor = SelectedColor.ToString();
+
+        System.Windows.Application.Current.Windows.OfType<Views.ColorPickerWindow>().FirstOrDefault()?.Close();
     }
 
     partial void OnSelectedColorChanged(Color value) {
-        if (TargetViewModel is not null && Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
+        if (TargetViewModel is null)
+            return;
+
+        if (Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
             TargetViewModel.StickyModel.BackgroundColor = value.ToString();
+
+        else if (Mode == OpenColorPickerMessage.PickerMode.FontColor)
+            WeakReferenceMessenger.Default.Send(new ChangeFontColorMessage(TargetViewModel, value));
+
+        else if (Mode == OpenColorPickerMessage.PickerMode.HighlightColor)
+            WeakReferenceMessenger.Default.Send(new ChangeHighlightColorMessage(TargetViewModel, value));
     }
 
     public void RevertColorIfNotApplied() {
-        if (!_isApplied && TargetViewModel is not null && Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
-            TargetViewModel.StickyModel.BackgroundColor = _originalColor!;
+        if (!_isApplied && TargetViewModel is not null) {
+            if (Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
+                TargetViewModel.StickyModel.BackgroundColor = _originalColor!;
+            else
+                WeakReferenceMessenger.Default.Send(new RestoreSelectionMessage(TargetViewModel));
+        }
     }
 }

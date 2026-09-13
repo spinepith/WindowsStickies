@@ -6,8 +6,13 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using WindowsStickies.Models;
 
+
 namespace WindowsStickies.Views {
     public partial class MainView : UserControl {
+        private System.IO.MemoryStream? _colorBackupStream;
+        private TextPointer? _backupStart;
+        private TextPointer? _backupEnd;
+
         public MainView() {
             InitializeComponent();
 
@@ -57,10 +62,16 @@ namespace WindowsStickies.Views {
                     try {
                         var run = new Run(textToInsert);
                         var link = new Span(run, r.Editor.Selection.Start) {
-                            Tag = safeUrl
+                            Tag = safeUrl,
+                            Style = (Style)r.FindResource("CustomHyperlinkStyle")
                         };
-                        link.Style = (Style)r.FindResource("CustomHyperlinkStyle");
-                        r.Editor.Selection.Select(link.ElementEnd, link.ElementEnd);
+
+                        var plainRun = new Run("", link.ElementEnd);
+
+                        r.Editor.Selection.Select(plainRun.ContentEnd, plainRun.ContentEnd);
+
+                        r.Editor.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
+                        r.Editor.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
                     }
                     catch { }
                 }
@@ -78,14 +89,54 @@ namespace WindowsStickies.Views {
                 r.Editor.Focus();
             });
 
+            WeakReferenceMessenger.Default.Register<MainView, BackupSelectionMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+                r._colorBackupStream?.Dispose();
+
+                if (r.Editor.Selection.IsEmpty) {
+                    r._colorBackupStream = null;
+                    return;
+                }
+
+                r._colorBackupStream = new System.IO.MemoryStream();
+                r.Editor.Selection.Save(r._colorBackupStream, DataFormats.Rtf);
+
+                r._backupStart = r.Editor.Selection.Start.GetPositionAtOffset(0, LogicalDirection.Forward);
+                r._backupEnd = r.Editor.Selection.End.GetPositionAtOffset(0, LogicalDirection.Backward);
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, RestoreSelectionMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel || r._colorBackupStream is null)
+                    return;
+
+                if (r._backupStart is not null && r._backupEnd is not null) {
+                    try {
+                        r.Editor.Selection.Select(r._backupStart, r._backupEnd);
+                    }
+                    catch { }
+                }
+
+                r._colorBackupStream.Position = 0;
+                r.Editor.Selection.Load(r._colorBackupStream, DataFormats.Rtf);
+                r._colorBackupStream.Dispose();
+                r._colorBackupStream = null;
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, ClearSelectionBackupMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                r._colorBackupStream?.Dispose();
+                r._colorBackupStream = null;
+            });
+
             WeakReferenceMessenger.Default.Register<MainView, ChangeFontColorMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
                     return;
 
                 var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
                 r.Editor.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, brush);
-
-                r.Editor.Focus();
             });
 
             WeakReferenceMessenger.Default.Register<MainView, ChangeHighlightColorMessage>(this, (r, m) => {
@@ -94,7 +145,6 @@ namespace WindowsStickies.Views {
 
                 var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
                 r.Editor.Selection.ApplyPropertyValue(TextElement.BackgroundProperty, brush);
-                r.Editor.Focus();
             });
 
             Editor.SelectionChanged += (s, e) => {
