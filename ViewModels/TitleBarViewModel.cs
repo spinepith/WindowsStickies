@@ -115,8 +115,12 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     }
 
     [RelayCommand]
-    private void SetFontStyle() {
-
+    private void SetFontStyle(string styleName) {
+        switch (styleName) {
+            case "Hyperlink":
+                WeakReferenceMessenger.Default.Send(new Models.OpenHyperlinkMessage { SourceViewModel = _mainViewModel });
+                break;
+        }
     }
 
     [RelayCommand]

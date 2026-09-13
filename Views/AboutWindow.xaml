@@ -10,7 +10,7 @@
         Background="White"
         Width="320"
         Height="320"
-        Title="AboutWindow"
+        Title="About"
         ResizeMode="NoResize"
         WindowState="{Binding WindowState, Mode=TwoWay}">
 

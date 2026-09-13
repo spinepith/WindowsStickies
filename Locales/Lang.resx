@@ -240,9 +240,6 @@
   <data name="Version" xml:space="preserve">
     <value>Version</value>
   </data>
-  <data name="HyperlinkMenu_Cancel" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
   <data name="HyperlinkMenu_Remove" xml:space="preserve">
     <value>Remove</value>
   </data>
@@ -266,5 +263,8 @@
   </data>
   <data name="Menu_Font_HighlightColor" xml:space="preserve">
     <value>Highlight Color</value>
+  </data>
+  <data name="HyperlinkMenu_Apply" xml:space="preserve">
+    <value>Apply</value>
   </data>
 </root>

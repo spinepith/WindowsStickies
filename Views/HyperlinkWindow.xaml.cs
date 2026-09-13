@@ -1,22 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace WindowsStickies.Views {
-    /// <summary>
-    /// Логика взаимодействия для ColorPickerWindow.xaml
-    /// </summary>
-    public partial class ColorPickerWindow : Window {
+    public partial class HyperlinkWindow : Window {
         private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
         private const int DWMWCP_DONOTROUND = 1;
         private const int DWMWCP_ROUND = 2;
@@ -33,7 +20,7 @@ namespace WindowsStickies.Views {
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
-        public ColorPickerWindow() {
+        public HyperlinkWindow() {
             InitializeComponent();
 
             SourceInitialized += (s, e) => {
@@ -46,11 +33,6 @@ namespace WindowsStickies.Views {
             Services.SettingsService.Instance.PropertyChanged += (s, e) => {
                 if (e.PropertyName is nameof(Services.SettingsService.IsRoundedCorners))
                     ApplyCornerPreference();
-            };
-
-            Closing += (s, e) => {
-                if (DataContext is ViewModels.ColorPickerViewModel vm)
-                    vm.RevertColorIfNotApplied();
             };
         }
 

@@ -240,9 +240,6 @@
   <data name="Version" xml:space="preserve">
     <value>Версия</value>
   </data>
-  <data name="HyperlinkMenu_Cancel" xml:space="preserve">
-    <value>Отменить</value>
-  </data>
   <data name="HyperlinkMenu_Remove" xml:space="preserve">
     <value>Удалить</value>
   </data>
@@ -266,5 +263,8 @@
   </data>
   <data name="Menu_Font_HighlightColor" xml:space="preserve">
     <value>Цвет фона</value>
+  </data>
+  <data name="HyperlinkMenu_Apply" xml:space="preserve">
+    <value>Применить</value>
   </data>
 </root>

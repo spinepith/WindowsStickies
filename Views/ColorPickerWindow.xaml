@@ -11,7 +11,8 @@
         WindowStyle="None"
         Background="White"
         Width="320"
-        Height="580"
+        Height="480"
+        Title="ColorPicker"
         ResizeMode="NoResize"
         Topmost="True"
         WindowStartupLocation="CenterOwner">

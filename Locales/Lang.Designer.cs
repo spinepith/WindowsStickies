@@ -133,11 +133,11 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Cancel.
+        ///   Ищет локализованную строку, похожую на Apply.
         /// </summary>
-        internal static string HyperlinkMenu_Cancel {
+        internal static string HyperlinkMenu_Apply {
             get {
-                return ResourceManager.GetString("HyperlinkMenu_Cancel", resourceCulture);
+                return ResourceManager.GetString("HyperlinkMenu_Apply", resourceCulture);
             }
         }
         

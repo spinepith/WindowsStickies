@@ -165,8 +165,14 @@
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Border" Property="Background" Value="#E0E0E0"/>
                         </Trigger>
+                        
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="#FFEFEFEF"/>
+                        </Trigger>
+                        
                     </ControlTemplate.Triggers>
-                    
+
+
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -198,6 +204,12 @@
             </Setter.Value>
         </Setter>
         
+    </Style>
+
+    <!--HYPERLINKS-->
+    <Style x:Key="CustomHyperlinkStyle" TargetType="Span">
+        <Setter Property="Foreground" Value="#0066CC"/>
+        <Setter Property="TextDecorations" Value="Underline"/>
     </Style>
 
 </ResourceDictionary>

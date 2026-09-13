@@ -10,6 +10,10 @@ public class OpenFindTextMessage {
     public ViewModels.MainViewModel? SourceViewModel { get; set; }
 }
 
+public class OpenHyperlinkMessage {
+    public ViewModels.MainViewModel? SourceViewModel { get; set; }
+}
+
 public class OpenColorPickerMessage {
     public ViewModels.MainViewModel? SourceViewModel { get; set; }
     public PickerMode Mode { get; set; }
@@ -21,10 +25,6 @@ public class OpenColorPickerMessage {
     }
 }
 
-public class OpenHyperlinkMessage {
-    public ViewModels.MainViewModel? SourceViewModel { get; set; }
-}
-
 ///////////////////////////////////////////////////////////////////
 public class FindRequestMessage {
     public ViewModels.MainViewModel TargetViewModel { get; }
@@ -33,6 +33,25 @@ public class FindRequestMessage {
     public FindRequestMessage(ViewModels.MainViewModel targetViewModel, string searchText) {
         TargetViewModel = targetViewModel;
         SearchText = searchText;
+    }
+}
+
+public class HyperlinkMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public HyperlinkAction Action { get; }
+    public string? Url { get; }
+    public string? DisplayText { get; }
+
+    public HyperlinkMessage(ViewModels.MainViewModel targetViewModel, HyperlinkAction action, string? url = null, string? displayText = null) {
+        TargetViewModel = targetViewModel;
+        Action = action;
+        Url = url;
+        DisplayText = displayText;
+    }
+
+    public enum HyperlinkAction {
+        Apply,
+        Remove
     }
 }
 

@@ -1,7 +1,9 @@
-using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+
 using CommunityToolkit.Mvvm.Messaging;
+
 using WindowsStickies.Models;
 
 namespace WindowsStickies.Views {
@@ -14,6 +16,66 @@ namespace WindowsStickies.Views {
                     return;
 
                 r.FindAndSelectText(m.SearchText);
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, HyperlinkMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                if (m.Action == HyperlinkMessage.HyperlinkAction.Apply) {
+                    string safeDisplayText = m.DisplayText ?? "";
+                    string safeUrl = m.Url ?? "";
+
+                    if (!string.IsNullOrWhiteSpace(safeUrl) &&
+                        !safeUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                        !safeUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                        safeUrl = "https://" + safeUrl;
+
+                    string textToInsert = string.IsNullOrEmpty(safeDisplayText) ? safeUrl : safeDisplayText;
+
+                    Span? existingLink = r.GetSmartHyperlink(r.Editor.Selection);
+
+                    if (existingLink is not null) {
+                        r.Editor.Selection.Select(existingLink.ElementStart, existingLink.ElementEnd);
+                    }
+                    else {
+                        Span? cutLink1 = r.GetHyperlinkFromPointer(r.Editor.Selection.Start);
+                        Span? cutLink2 = r.GetHyperlinkFromPointer(r.Editor.Selection.End);
+
+                        if (cutLink1 is not null) {
+                            cutLink1.Tag = null;
+                            cutLink1.Style = null;
+                        }
+                        if (cutLink2 is not null) {
+                            cutLink2.Tag = null;
+                            cutLink2.Style = null;
+                        }
+                    }
+
+                    r.Editor.Selection.Text = "";
+
+                    try {
+                        var run = new Run(textToInsert);
+                        var link = new Span(run, r.Editor.Selection.Start) {
+                            Tag = safeUrl
+                        };
+                        link.Style = (Style)r.FindResource("CustomHyperlinkStyle");
+                        r.Editor.Selection.Select(link.ElementEnd, link.ElementEnd);
+                    }
+                    catch { }
+                }
+                else if (m.Action == HyperlinkMessage.HyperlinkAction.Remove) {
+                    Span? link = r.GetSmartHyperlink(r.Editor.Selection);
+                    if (link is not null) {
+                        string plainText = new TextRange(link.ContentStart, link.ContentEnd).Text;
+                        r.Editor.Selection.Select(link.ElementStart, link.ElementEnd);
+                        r.Editor.Selection.Text = plainText;
+
+                        link.Tag = null;
+                        link.Style = null;
+                    }
+                }
+                r.Editor.Focus();
             });
 
             WeakReferenceMessenger.Default.Register<MainView, ChangeFontColorMessage>(this, (r, m) => {
@@ -37,10 +99,13 @@ namespace WindowsStickies.Views {
 
             Editor.SelectionChanged += (s, e) => {
                 if (DataContext is ViewModels.MainViewModel vm) {
+                    vm.HasSelection = !Editor.Selection.IsEmpty;
 
                     string text = Editor.Selection.Text;
                     if (!string.IsNullOrWhiteSpace(text))
                         vm.SelectedText = text.Split('\r', '\n')[0];
+                    else
+                        vm.SelectedText = "";
 
                     var fgProperty = Editor.Selection.GetPropertyValue(TextElement.ForegroundProperty);
                     if (fgProperty is System.Windows.Media.SolidColorBrush fgBrush)
@@ -61,8 +126,54 @@ namespace WindowsStickies.Views {
                         else
                             vm.SelectedHighlightColor = "#00000000";
                     }
+
+                    Span? foundLink = GetSmartHyperlink(Editor.Selection);
+                    if (foundLink is not null && foundLink.Tag is string url) {
+                        vm.SelectedHyperlinkUrl = url;
+                        vm.SelectedText = new TextRange(foundLink.ContentStart, foundLink.ContentEnd).Text;
+                    }
+                    else {
+                        vm.SelectedHyperlinkUrl = "";
+                        string span = Editor.Selection.Text;
+                        if (!string.IsNullOrWhiteSpace(span))
+                            vm.SelectedText = span.Split('\r', '\n')[0];
+                        else
+                            vm.SelectedText = "";
+                    }
                 }
             };
+
+            Editor.PreviewMouseLeftButtonDown += (s, e) => {
+                if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
+                    var position = Editor.GetPositionFromPoint(e.GetPosition(Editor), true);
+                    if (position is not null) {
+                        var link = GetHyperlinkFromPointer(position);
+                        if (link is not null && link.Tag is string url) {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+                                FileName = url,
+                                UseShellExecute = true
+                            });
+                            e.Handled = true;
+                        }
+                    }
+                }
+            };
+
+            void UpdateCursor() {
+                if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
+                    var pos = Editor.GetPositionFromPoint(System.Windows.Input.Mouse.GetPosition(Editor), true);
+                    if (pos is not null && GetHyperlinkFromPointer(pos) is not null) {
+                        Editor.Cursor = System.Windows.Input.Cursors.Hand;
+                        return;
+                    }
+                }
+                Editor.Cursor = System.Windows.Input.Cursors.IBeam;
+            }
+
+            Editor.TextChanged += (s, e) => CleanGhostLinks();
+            Editor.MouseMove += (s, e) => UpdateCursor();
+            Editor.PreviewKeyDown += (s, e) => UpdateCursor();
+            Editor.PreviewKeyUp += (s, e) => UpdateCursor();
         }
 
         private void FindAndSelectText(string searchText) {
@@ -104,6 +215,60 @@ namespace WindowsStickies.Views {
                 position = position.GetNextContextPosition(LogicalDirection.Forward);
             }
             return null;
+        }
+
+        private Span? GetSmartHyperlink(TextSelection selection) {
+            Span? foundLink = GetHyperlinkFromPointer(selection.Start) ?? GetHyperlinkFromPointer(selection.End);
+
+            if (foundLink is null && !selection.IsEmpty) {
+                var insidePos = selection.Start.GetNextInsertionPosition(LogicalDirection.Forward);
+                if (insidePos is not null && selection.Contains(insidePos))
+                    foundLink = GetHyperlinkFromPointer(insidePos);
+            }
+
+            if (foundLink is not null && !selection.IsEmpty) {
+                if (selection.Start.CompareTo(foundLink.ElementStart) < 0 ||
+                    selection.End.CompareTo(foundLink.ElementEnd) > 0) {
+                    return null;
+                }
+            }
+
+            return foundLink;
+        }
+
+        private Span? GetHyperlinkFromPointer(TextPointer pointer) {
+            DependencyObject parent = pointer.Parent;
+            
+            while (parent is Inline inline) {
+                if (inline is Span span && span.Tag is string)
+                    return span;
+                parent = inline.Parent;
+            }
+
+            return null;
+        }
+
+        private void CleanGhostLinks() {
+            var pointer = Editor.CaretPosition;
+            if (pointer is null || GetHyperlinkFromPointer(pointer) is not null)
+                return;
+
+            var runs = new[] {
+                    pointer.Parent as Run,
+                    pointer.GetAdjacentElement(LogicalDirection.Forward) as Run,
+                    pointer.GetAdjacentElement(LogicalDirection.Backward) as Run
+                };
+
+            foreach (var run in runs) {
+                if (run is not null) {
+                    if (run.ReadLocalValue(Inline.TextDecorationsProperty) != DependencyProperty.UnsetValue)
+                        run.ClearValue(Inline.TextDecorationsProperty);
+
+                    if (run.ReadLocalValue(TextElement.ForegroundProperty) is System.Windows.Media.SolidColorBrush b &&
+                        b.Color == System.Windows.Media.Color.FromRgb(0, 102, 204))
+                        run.ClearValue(System.Windows.Documents.TextElement.ForegroundProperty);
+                }
+            }
         }
     }
 }

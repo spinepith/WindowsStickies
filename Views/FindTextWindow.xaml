@@ -11,6 +11,7 @@
         Background="White"
         Width="480"
         Height="60"
+        Title="Find"
         ResizeMode="NoResize"
         Topmost="True"
         FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}"

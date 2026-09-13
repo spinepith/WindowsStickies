@@ -24,7 +24,7 @@
         <KeyBinding Gesture="Ctrl+F" Command="{Binding TitleBar.FindCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+T" Command=""/>
         <KeyBinding Gesture="Ctrl+T" Command=""/>
-        <KeyBinding Gesture="Ctrl+K" Command=""/>
+        <KeyBinding Gesture="Ctrl+K" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Hyperlink"/>
         <KeyBinding Gesture="Ctrl+OemPlus" Command=""/>
         <KeyBinding Gesture="Ctrl+OemMinus" Command=""/>
         <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command=""/>

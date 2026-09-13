@@ -7,7 +7,13 @@ public partial class MainViewModel : ViewModelBase {
     public Models.StickyModel StickyModel { get; }
 
     [ObservableProperty]
+    private bool _hasSelection = false;
+
+    [ObservableProperty]
     private string _selectedText = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedHyperlinkUrl = "";
 
     [ObservableProperty]
     private string _selectedFontColor = "#FF000000";
