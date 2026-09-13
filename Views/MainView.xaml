@@ -9,7 +9,14 @@
              d:DesignHeight="480"
              d:DesignWidth="480">
 
-    <RichTextBox x:Name="Editor" Background="Transparent" FontSize="12" Foreground="Black" Padding="0, 2">
+    <RichTextBox x:Name="Editor" IsInactiveSelectionHighlightEnabled="True" Background="Transparent" FontSize="12" Foreground="Black" Padding="0, 2">
+
+        <RichTextBox.InputBindings>
+            <KeyBinding Gesture="Ctrl+Shift+V" Command=""/>
+            <KeyBinding Gesture="Ctrl+K" Command=""/>
+            <KeyBinding Gesture="Ctrl+Shift+C" Command="{Binding TitleBar.FontColorCommand}"/>
+        </RichTextBox.InputBindings>
+
         <RichTextBox.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="{Binding [ContextMenu_Cut], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Cut"/>
@@ -20,6 +27,7 @@
                 <MenuItem Header="{Binding [ContextMenu_Hyperlink], Source={x:Static locales:Localizer.Instance}}" Command="EditingCommands.ToggleInsert"/>
             </ContextMenu>
         </RichTextBox.ContextMenu>
+        
     </RichTextBox>
 
 </UserControl>

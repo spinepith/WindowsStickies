@@ -150,17 +150,17 @@
   <data name="Menu_Color_Gray" xml:space="preserve">
     <value>Серый</value>
   </data>
-  <data name="Menu_Color_Green" xml:space="preserve">
-    <value>Зеленый</value>
+  <data name="Menu_Color_LightGreen" xml:space="preserve">
+    <value>Салатовый</value>
   </data>
-  <data name="Menu_Color_Pink" xml:space="preserve">
-    <value>Розовый</value>
+  <data name="Menu_Color_Lavender" xml:space="preserve">
+    <value>Лавандовый</value>
   </data>
   <data name="Menu_Color_White" xml:space="preserve">
     <value>Белый</value>
   </data>
-  <data name="Menu_Color_Yellow" xml:space="preserve">
-    <value>Желтый</value>
+  <data name="Menu_Color_Peach" xml:space="preserve">
+    <value>Персиковый</value>
   </data>
   <data name="Menu_Edit" xml:space="preserve">
     <value>Правка</value>
@@ -202,7 +202,7 @@
     <value>Жирный</value>
   </data>
   <data name="Menu_Font_Color" xml:space="preserve">
-    <value>Цвет</value>
+    <value>Цвет текста</value>
   </data>
   <data name="Menu_Font_Decrease" xml:space="preserve">
     <value>Уменьшить</value>
@@ -260,5 +260,11 @@
   </data>
   <data name="FindMenu_FindNext" xml:space="preserve">
     <value>Найти далее</value>
+  </data>
+  <data name="ColorPickerMenu_Apply" xml:space="preserve">
+    <value>Применить</value>
+  </data>
+  <data name="Menu_Font_HighlightColor" xml:space="preserve">
+    <value>Цвет фона</value>
   </data>
 </root>

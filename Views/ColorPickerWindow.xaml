@@ -1,19 +1,19 @@
-<Window x:Class="WindowsStickies.Views.FindTextWindow"
+﻿<Window x:Class="WindowsStickies.Views.ColorPickerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:colorpicker="clr-namespace:ColorPicker;assembly=ColorPicker"
         xmlns:views="clr-namespace:WindowsStickies.Views"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:locales="clr-namespace:WindowsStickies.Locales"
         mc:Ignorable="d"
         WindowStyle="None"
         Background="White"
-        Width="480"
-        Height="60"
+        Width="320"
+        Height="580"
         ResizeMode="NoResize"
         Topmost="True"
-        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}"
         WindowStartupLocation="CenterOwner">
 
     <shell:WindowChrome.WindowChrome>
@@ -25,9 +25,16 @@
         <views:BaseTitleBarView Grid.Row="0"/>
 
         <Border Grid.Row="1" Padding="4">
-            <Grid ColumnDefinitions="*, Auto" Margin="4">
-                <TextBox Grid.Column="0" x:Name="SearchTextBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="0, 0, 8, 0"/>
-                <Button Grid.Column="1" VerticalAlignment="Stretch" Command="{Binding FindNextCommand}" Content="{Binding [FindMenu_FindNext], Source={x:Static locales:Localizer.Instance}}"/>
+            <Grid RowDefinitions="*, Auto">
+                
+                <colorpicker:StandardColorPicker SelectedColor="{Binding SelectedColor, Mode=TwoWay}" Background="White">
+                    <colorpicker:StandardColorPicker.Resources>
+                        <Style TargetType="TextBox" />
+                    </colorpicker:StandardColorPicker.Resources>
+                </colorpicker:StandardColorPicker>
+                
+                <Button Grid.Row="1" VerticalAlignment="Stretch" Command="{Binding ApplyColorCommand}" Content="{Binding [ColorPickerMenu_Apply], Source={x:Static locales:Localizer.Instance}}" Margin="8, 0, 8, 4"/>
+                
             </Grid>
         </Border>
 

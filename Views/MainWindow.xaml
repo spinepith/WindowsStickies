@@ -10,12 +10,27 @@
         mc:Ignorable="d"
         Width="240"
         Height="240"
-        Background="NavajoWhite"
+        Background="{Binding StickyModel.BackgroundColor}"
         Title="Stickies"
         Icon="/assets/icon.ico"
         ResizeMode="CanResize"
         Topmost="{Binding TitleBar.IsTopmost}"
         WindowState="{Binding WindowState, Mode=TwoWay}">
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding TitleBar.NewStickyCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+V" Command=""/>
+        <KeyBinding Gesture="Ctrl+D" Command=""/>
+        <KeyBinding Gesture="Ctrl+F" Command="{Binding TitleBar.FindCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+T" Command=""/>
+        <KeyBinding Gesture="Ctrl+T" Command=""/>
+        <KeyBinding Gesture="Ctrl+K" Command=""/>
+        <KeyBinding Gesture="Ctrl+OemPlus" Command=""/>
+        <KeyBinding Gesture="Ctrl+OemMinus" Command=""/>
+        <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command=""/>
+        <KeyBinding Gesture="Ctrl+Shift+OemMinus" Command=""/>
+        <KeyBinding Gesture="Ctrl+Shift+C" Command="{Binding TitleBar.FontColorCommand}"/>
+    </Window.InputBindings>
 
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="16" ResizeBorderThickness="4" CornerRadius="0"/>

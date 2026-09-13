@@ -143,14 +143,22 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     [RelayCommand]
     private void FontColor() {
+        WeakReferenceMessenger.Default.Send(new Models.OpenColorPickerMessage { SourceViewModel = _mainViewModel, Mode = Models.OpenColorPickerMessage.PickerMode.FontColor });
+    }
 
+    [RelayCommand]
+    private void HighlightColor() {
+        WeakReferenceMessenger.Default.Send(new Models.OpenColorPickerMessage { SourceViewModel = _mainViewModel, Mode = Models.OpenColorPickerMessage.PickerMode.HighlightColor });
     }
     #endregion
 
     #region COLOR
     [RelayCommand]
-    private void BackgroundColor() {
-
+    private void BackgroundColor(string? hexColor) {
+        if (!string.IsNullOrEmpty(hexColor))
+            Model.BackgroundColor = hexColor;
+        else
+            WeakReferenceMessenger.Default.Send(new Models.OpenColorPickerMessage { SourceViewModel = _mainViewModel, Mode = Models.OpenColorPickerMessage.PickerMode.BackgroundColor });
     }
     #endregion
 

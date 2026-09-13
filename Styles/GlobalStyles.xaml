@@ -12,10 +12,11 @@
                 <ControlTemplate TargetType="MenuItem">
 
                     <Border x:Name="Border" Background="White" BorderBrush="Transparent" BorderThickness="1" Padding="4, 0" CornerRadius="{Binding Source={x:Static local:CornerRadiusHelper.Instance}, Path=MenuItemRadius}">
-                        <Grid ColumnDefinitions="Auto, *, Auto">
+                        <Grid ColumnDefinitions="Auto, *, Auto, Auto">
 
                             <ContentPresenter Grid.Column="0" x:Name="Icon" ContentSource="Icon" VerticalAlignment="Center"/>
                             <ContentPresenter Grid.Column="1" x:Name="HeaderHost" ContentSource="Header" VerticalAlignment="Center" Margin="0, 0, 16, 2"/>
+                            <TextBlock Grid.Column="2" Text="{TemplateBinding InputGestureText}" Foreground="Gray" VerticalAlignment="Center" Margin="0, 0, 0, 2"/>
                             <Path Grid.Column="3" x:Name="Arrow" VerticalAlignment="Center" Fill="Black" Data="M 0 0 L 4 3.5 L 0 7 Z" Visibility="Collapsed" Margin="0, 0, 2, 0"/>
                             <Rectangle x:Name="SeparatorLine" Grid.ColumnSpan="4" Height="1" Fill="#B0B0B0" VerticalAlignment="Center" Visibility="Collapsed"/>
 

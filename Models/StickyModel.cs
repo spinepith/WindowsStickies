@@ -28,6 +28,9 @@ public partial class StickyModel : ObservableObject {
     private bool _isTopmost = false;
 
     [ObservableProperty]
+    private string _backgroundColor = "NavajoWhite";
+
+    [ObservableProperty]
     private double _zoom = 1.0;
 
     [ObservableProperty]

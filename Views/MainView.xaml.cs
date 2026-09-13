@@ -15,6 +15,54 @@ namespace WindowsStickies.Views {
 
                 r.FindAndSelectText(m.SearchText);
             });
+
+            WeakReferenceMessenger.Default.Register<MainView, ChangeFontColorMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
+                r.Editor.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, brush);
+
+                r.Editor.Focus();
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, ChangeHighlightColorMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
+                r.Editor.Selection.ApplyPropertyValue(TextElement.BackgroundProperty, brush);
+                r.Editor.Focus();
+            });
+
+            Editor.SelectionChanged += (s, e) => {
+                if (DataContext is ViewModels.MainViewModel vm) {
+
+                    string text = Editor.Selection.Text;
+                    if (!string.IsNullOrWhiteSpace(text))
+                        vm.SelectedText = text.Split('\r', '\n')[0];
+
+                    var fgProperty = Editor.Selection.GetPropertyValue(TextElement.ForegroundProperty);
+                    if (fgProperty is System.Windows.Media.SolidColorBrush fgBrush)
+                        vm.SelectedFontColor = fgBrush.Color.ToString();
+                    else if (Editor.Selection.Start.Parent is TextElement fgParent) {
+                        var firstCharProp = fgParent.GetValue(TextElement.ForegroundProperty);
+                        if (firstCharProp is System.Windows.Media.SolidColorBrush firstBrush)
+                            vm.SelectedFontColor = firstBrush.Color.ToString();
+                    }
+
+                    var bgProperty = Editor.Selection.GetPropertyValue(TextElement.BackgroundProperty);
+                    if (bgProperty is System.Windows.Media.SolidColorBrush bgBrush)
+                        vm.SelectedHighlightColor = bgBrush.Color.ToString();
+                    else if (Editor.Selection.Start.Parent is TextElement bgParent) {
+                        var firstCharProp = bgParent.GetValue(TextElement.BackgroundProperty);
+                        if (firstCharProp is System.Windows.Media.SolidColorBrush firstBrush)
+                            vm.SelectedHighlightColor = firstBrush.Color.ToString();
+                        else
+                            vm.SelectedHighlightColor = "#00000000";
+                    }
+                }
+            };
         }
 
         private void FindAndSelectText(string searchText) {

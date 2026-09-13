@@ -61,6 +61,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Apply.
+        /// </summary>
+        internal static string ColorPickerMenu_Apply {
+            get {
+                return ResourceManager.GetString("ColorPickerMenu_Apply", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Copy.
         /// </summary>
         internal static string ContextMenu_Copy {
@@ -214,20 +223,29 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Green.
+        ///   Ищет локализованную строку, похожую на Lavender.
         /// </summary>
-        internal static string Menu_Color_Green {
+        internal static string Menu_Color_Lavender {
             get {
-                return ResourceManager.GetString("Menu_Color_Green", resourceCulture);
+                return ResourceManager.GetString("Menu_Color_Lavender", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Pink.
+        ///   Ищет локализованную строку, похожую на Light Green.
         /// </summary>
-        internal static string Menu_Color_Pink {
+        internal static string Menu_Color_LightGreen {
             get {
-                return ResourceManager.GetString("Menu_Color_Pink", resourceCulture);
+                return ResourceManager.GetString("Menu_Color_LightGreen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Peach.
+        /// </summary>
+        internal static string Menu_Color_Peach {
+            get {
+                return ResourceManager.GetString("Menu_Color_Peach", resourceCulture);
             }
         }
         
@@ -237,15 +255,6 @@ namespace WindowsStickies.Locales {
         internal static string Menu_Color_White {
             get {
                 return ResourceManager.GetString("Menu_Color_White", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Yellow.
-        /// </summary>
-        internal static string Menu_Color_Yellow {
-            get {
-                return ResourceManager.GetString("Menu_Color_Yellow", resourceCulture);
             }
         }
         
@@ -376,7 +385,7 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Color.
+        ///   Ищет локализованную строку, похожую на Font Color.
         /// </summary>
         internal static string Menu_Font_Color {
             get {
@@ -399,6 +408,15 @@ namespace WindowsStickies.Locales {
         internal static string Menu_Font_DecreaseAll {
             get {
                 return ResourceManager.GetString("Menu_Font_DecreaseAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Highlight Color.
+        /// </summary>
+        internal static string Menu_Font_HighlightColor {
+            get {
+                return ResourceManager.GetString("Menu_Font_HighlightColor", resourceCulture);
             }
         }
         

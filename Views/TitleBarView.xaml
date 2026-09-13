@@ -96,19 +96,20 @@
                             <MenuItem Header="{Binding [Menu_Font_IncreaseAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift++"/>
                             <MenuItem Header="{Binding [Menu_Font_DecreaseAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+-"/>
                             <Separator />
-                            <MenuItem Header="{Binding [Menu_Font_Color], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+C"/>
+                            <MenuItem Header="{Binding [Menu_Font_Color], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+C" Command="{Binding FontColorCommand}"/>
+                            <MenuItem Header="{Binding [Menu_Font_HighlightColor], Source={x:Static locales:Localizer.Instance}}" Command="{Binding HighlightColorCommand}"/>
                         </MenuItem>
 
                         <MenuItem Header="{Binding [Menu_Color], Source={x:Static locales:Localizer.Instance}}">
-                            <MenuItem Header="{Binding [Menu_Color_White], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_Color_Gray], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_Color_Yellow], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_Color_Blue], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_Color_Green], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_Color_Pink], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_Color_Black], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{Binding [Menu_Color_White], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#FFFFFF"/>
+                            <MenuItem Header="{Binding [Menu_Color_Gray], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#CFCFCF"/>
+                            <MenuItem Header="{Binding [Menu_Color_Peach], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#FFE5B4"/>
+                            <MenuItem Header="{Binding [Menu_Color_Blue], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#AFDAFC"/>
+                            <MenuItem Header="{Binding [Menu_Color_LightGreen], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#99FF99"/>
+                            <MenuItem Header="{Binding [Menu_Color_Lavender], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#CCCCFF"/>
+                            <MenuItem Header="{Binding [Menu_Color_Black], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#000000"/>
                             <Separator />
-                            <MenuItem Header="{Binding [Menu_Color_ChooseColor], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{Binding [Menu_Color_ChooseColor], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}"/>
                         </MenuItem>
 
                         <MenuItem Header="{Binding [Menu_Language], Source={x:Static locales:Localizer.Instance}}" ItemsSource="{Binding AvailableLanguages}">

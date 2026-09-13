@@ -10,9 +10,10 @@ namespace WindowsStickies.Services;
 
 public class WindowService {
     public static WindowService Instance { get; } = new();
+    private FindTextWindow? _findTextWindow;
+    private ColorPickerWindow? _colorPickerWindow;
 
     private AboutWindow? _aboutWindow;
-    private FindTextWindow? _findTextWindow;
 
     public void Initialize() {
         WeakReferenceMessenger.Default.Register<WindowService, Models.NewStickyMessage>(this, (r, m) => {
@@ -20,7 +21,7 @@ public class WindowService {
             double targetY = 100;
 
             var stickies = SessionService.Instance.ActiveStickies;
-            while (System.Linq.Enumerable.Any(stickies, s => Math.Abs(s.X - targetX) < 5 && Math.Abs(s.Y - targetY) < 5)) {
+            while (Enumerable.Any(stickies, s => Math.Abs(s.X - targetX) < 5 && Math.Abs(s.Y - targetY) < 5)) {
                 targetX += 30;
                 targetY += 30;
             }
@@ -42,8 +43,11 @@ public class WindowService {
                 if (r._findTextWindow.WindowState == WindowState.Minimized)
                     r._findTextWindow.WindowState = WindowState.Normal;
 
-                if (r._findTextWindow.DataContext is FindTextViewModel vm)
+                if (r._findTextWindow.DataContext is FindTextViewModel vm) {
                     vm.TargetViewModel = m.SourceViewModel;
+                    if (!string.IsNullOrWhiteSpace(m.SourceViewModel?.SelectedText))
+                        vm.SearchText = m.SourceViewModel.SelectedText;
+                }
 
                 var newOwner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
 
@@ -59,13 +63,48 @@ public class WindowService {
             }
 
             var owner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
+            var findVm = new FindTextViewModel(m.SourceViewModel);
+            if (!string.IsNullOrEmpty(m.SourceViewModel?.SelectedText))
+                findVm.SearchText = m.SourceViewModel.SelectedText;
 
             r._findTextWindow = new FindTextWindow {
                 Owner = owner,
-                DataContext = new FindTextViewModel(m.SourceViewModel)
+                DataContext = findVm
             };
 
             r._findTextWindow.Show();
+        });
+
+        WeakReferenceMessenger.Default.Register<WindowService, Models.OpenColorPickerMessage>(this, (r, m) => {
+            if (r._colorPickerWindow is not null && r._colorPickerWindow.IsVisible) {
+                if (r._colorPickerWindow.WindowState == WindowState.Minimized)
+                    r._colorPickerWindow.WindowState = WindowState.Normal;
+
+                if (r._colorPickerWindow.DataContext is ColorPickerViewModel vm) {
+                    vm.SetupNewTarget(m.SourceViewModel, m.Mode);
+                }
+
+                var newOwner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
+
+                if (newOwner is not null) {
+                    r._colorPickerWindow.Owner = newOwner;
+
+                    r._colorPickerWindow.Left = newOwner.Left + (newOwner.ActualWidth - r._colorPickerWindow.ActualWidth) / 2;
+                    r._colorPickerWindow.Top = newOwner.Top + (newOwner.ActualHeight - r._colorPickerWindow.ActualHeight) / 2;
+                }
+
+                r._colorPickerWindow.Activate();
+                return;
+            }
+
+            var owner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
+
+            r._colorPickerWindow = new ColorPickerWindow {
+                Owner = owner,
+                DataContext = new ColorPickerViewModel(m.SourceViewModel, m.Mode)
+            };
+
+            r._colorPickerWindow.Show();
         });
 
         WeakReferenceMessenger.Default.Register<WindowService, Models.OpenAboutMessage>(this, (r, m) => {

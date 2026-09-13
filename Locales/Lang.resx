@@ -150,17 +150,17 @@
   <data name="Menu_Color_Gray" xml:space="preserve">
     <value>Gray</value>
   </data>
-  <data name="Menu_Color_Green" xml:space="preserve">
-    <value>Green</value>
+  <data name="Menu_Color_LightGreen" xml:space="preserve">
+    <value>Light Green</value>
   </data>
-  <data name="Menu_Color_Pink" xml:space="preserve">
-    <value>Pink</value>
+  <data name="Menu_Color_Lavender" xml:space="preserve">
+    <value>Lavender</value>
   </data>
   <data name="Menu_Color_White" xml:space="preserve">
     <value>White</value>
   </data>
-  <data name="Menu_Color_Yellow" xml:space="preserve">
-    <value>Yellow</value>
+  <data name="Menu_Color_Peach" xml:space="preserve">
+    <value>Peach</value>
   </data>
   <data name="Menu_Edit" xml:space="preserve">
     <value>Edit</value>
@@ -202,7 +202,7 @@
     <value>Bold</value>
   </data>
   <data name="Menu_Font_Color" xml:space="preserve">
-    <value>Color</value>
+    <value>Font Color</value>
   </data>
   <data name="Menu_Font_Decrease" xml:space="preserve">
     <value>Decrease Size</value>
@@ -260,5 +260,11 @@
   </data>
   <data name="FindMenu_FindNext" xml:space="preserve">
     <value>Find Next</value>
+  </data>
+  <data name="ColorPickerMenu_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Menu_Font_HighlightColor" xml:space="preserve">
+    <value>Highlight Color</value>
   </data>
 </root>
