@@ -9,12 +9,48 @@ using WindowsStickies.Models;
 
 namespace WindowsStickies.Views {
     public partial class MainView : UserControl {
+        private System.Windows.Threading.DispatcherTimer _saveTimer;
+        private bool _isTextDirty = false;
+        private bool _isLoading = false;
+
         private System.IO.MemoryStream? _colorBackupStream;
         private TextPointer? _backupStart;
         private TextPointer? _backupEnd;
 
         public MainView() {
             InitializeComponent();
+
+            _saveTimer = new System.Windows.Threading.DispatcherTimer {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _saveTimer.Tick += (s, e) => {
+                if (_isTextDirty) {
+                    SaveRichTextToModel();
+                    _isTextDirty = false;
+                }
+                else
+                    _saveTimer.Stop();
+            };
+
+            Loaded += (s, e) => {
+                if (DataContext is ViewModels.MainViewModel vm && !string.IsNullOrEmpty(vm.StickyModel.Text)) {
+                    _isLoading = true;
+                    try {
+                        var range = new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd);
+                        using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(vm.StickyModel.Text));
+                        range.Load(stream, System.Windows.DataFormats.Rtf);
+                    }
+                    catch {
+                        new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd).Text = vm.StickyModel.Text;
+                    }
+                    _isLoading = false;
+                }
+            };
+
+            Unloaded += (s, e) => {
+                if (_isTextDirty)
+                    SaveRichTextToModel();
+            };
 
             WeakReferenceMessenger.Default.Register<MainView, FindRequestMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
@@ -220,10 +256,29 @@ namespace WindowsStickies.Views {
                 Editor.Cursor = System.Windows.Input.Cursors.IBeam;
             }
 
-            Editor.TextChanged += (s, e) => CleanGhostLinks();
+            Editor.TextChanged += (s, e) => {
+                if (_isLoading)
+                    return;
+
+                CleanGhostLinks();
+
+                _isTextDirty = true;
+                if (!_saveTimer.IsEnabled)
+                    _saveTimer.Start();
+            };
+
             Editor.MouseMove += (s, e) => UpdateCursor();
             Editor.PreviewKeyDown += (s, e) => UpdateCursor();
             Editor.PreviewKeyUp += (s, e) => UpdateCursor();
+        }
+
+        private void SaveRichTextToModel() {
+            if (DataContext is ViewModels.MainViewModel vm) {
+                var range = new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd);
+                using var stream = new System.IO.MemoryStream();
+                range.Save(stream, System.Windows.DataFormats.Rtf);
+                vm.StickyModel.Text = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+            }
         }
 
         private void FindAndSelectText(string searchText) {
