@@ -286,6 +286,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Clear Formatting.
+        /// </summary>
+        internal static string Menu_Edit_ClearFormatting {
+            get {
+                return ResourceManager.GetString("Menu_Edit_ClearFormatting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Copy.
         /// </summary>
         internal static string Menu_Edit_Copy {

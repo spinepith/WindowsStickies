@@ -19,6 +19,8 @@ namespace WindowsStickies.Views {
         private TextPointer? _backupStart;
         private TextPointer? _backupEnd;
 
+        private bool _clearFormattingOnNextInput = false;
+
         public MainView() {
             InitializeComponent();
 
@@ -58,6 +60,14 @@ namespace WindowsStickies.Views {
                     _isLoading = false;
                     Editor.Document.PageWidth = Editor.ActualWidth;
                 }
+
+                if (DataContext is ViewModels.MainViewModel viewModel) {
+                    viewModel.StickyModel.PropertyChanged += (sender, args) => {
+                        if (args.PropertyName is nameof(viewModel.StickyModel.IsRuledLines)) {
+                            DrawRuledLines();
+                        }
+                    };
+                }
             };
 
             Unloaded += (s, e) => {
@@ -71,109 +81,109 @@ namespace WindowsStickies.Views {
 
                 switch (m.Action) {
                     case ImportExportMessage.Operation.Import: {
-                        var dlg = new Microsoft.Win32.OpenFileDialog {
-                            Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
-                        };
+                            var dlg = new Microsoft.Win32.OpenFileDialog {
+                                Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
+                            };
 
-                        if (dlg.ShowDialog() is not true)
-                            return;
+                            if (dlg.ShowDialog() is not true)
+                                return;
 
-                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+                            string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
 
-                        try {
-                            if (ext is ".xaml") {
-                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                                var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
-                                r.Editor.Document = doc;
-                            }
-                            else if (ext is ".rtf") {
-                                byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
-                                string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
-
-                                var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
-
-                                bool loaded = false;
-                                if (match.Success) {
-                                    try {
-                                        byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
-                                        using var xamlStream = new System.IO.MemoryStream(xamlBytes);
-                                        r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
-                                        loaded = true;
-                                    }
-                                    catch { }
-                                }
-
-                                if (!loaded) {
-                                    r.Editor.Document.Blocks.Clear();
-                                    var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
+                            try {
+                                if (ext is ".xaml") {
                                     using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                                    range.Load(stream, DataFormats.Rtf);
-                                    StripRtfMarkers(r.Editor.Document.Blocks);
+                                    var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
+                                    r.Editor.Document = doc;
+                                }
+                                else if (ext is ".rtf") {
+                                    byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
+                                    string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
+
+                                    var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
+
+                                    bool loaded = false;
+                                    if (match.Success) {
+                                        try {
+                                            byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
+                                            using var xamlStream = new System.IO.MemoryStream(xamlBytes);
+                                            r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
+                                            loaded = true;
+                                        }
+                                        catch { }
+                                    }
+
+                                    if (!loaded) {
+                                        r.Editor.Document.Blocks.Clear();
+                                        var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
+                                        using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                                        range.Load(stream, DataFormats.Rtf);
+                                        StripRtfMarkers(r.Editor.Document.Blocks);
+                                    }
+                                }
+                                else {
+                                    string text = System.IO.File.ReadAllText(dlg.FileName);
+                                    new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
                                 }
                             }
-                            else {
-                                string text = System.IO.File.ReadAllText(dlg.FileName);
-                                new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
-                            }
-                        }
-                        catch { }
-
-                        break;
-                    }
-
-                    case ImportExportMessage.Operation.Export: {
-                        var dlg = new Microsoft.Win32.SaveFileDialog {
-                            Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
-                            FileName = "note",
-                            DefaultExt = ".txt"
-                        };
-
-                        if (dlg.ShowDialog() is not true)
-                            return;
-
-                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
-
-                        try {
-                            if (ext is ".xaml") {
-                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
-                            }
-                            else if (ext is ".rtf") {
-                                var exportDoc = CloneDocument(r.Editor.Document);
-                                PadEmptyParagraphsForRtf(exportDoc.Blocks);
-
-                                var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
-                                using var rtfStream = new System.IO.MemoryStream();
-                                range.Save(rtfStream, DataFormats.Rtf);
-
-                                using var xamlStream = new System.IO.MemoryStream();
-                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
-                                string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
-
-                                byte[] rtfBytes = rtfStream.ToArray();
-                                byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
-
-                                int end = rtfBytes.Length;
-                                while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
-                                    end--;
-
-                                using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                                outStream.Write(rtfBytes, 0, end - 1);
-                                outStream.Write(marker, 0, marker.Length);
-                                outStream.WriteByte((byte)'}');
-                                outStream.Write(rtfBytes, end, rtfBytes.Length - end);
-                            }
-                            else {
-                                string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
-                                System.IO.File.WriteAllText(dlg.FileName, text);
-                            }
-                        }
-                        catch (Exception ex) {
-                            System.Windows.MessageBox.Show(ex.ToString());
-                        }
+                            catch { }
 
                             break;
-                    }
+                        }
+
+                    case ImportExportMessage.Operation.Export: {
+                            var dlg = new Microsoft.Win32.SaveFileDialog {
+                                Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
+                                FileName = "note",
+                                DefaultExt = ".txt"
+                            };
+
+                            if (dlg.ShowDialog() is not true)
+                                return;
+
+                            string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+
+                            try {
+                                if (ext is ".xaml") {
+                                    using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                    System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
+                                }
+                                else if (ext is ".rtf") {
+                                    var exportDoc = CloneDocument(r.Editor.Document);
+                                    PadEmptyParagraphsForRtf(exportDoc.Blocks);
+
+                                    var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
+                                    using var rtfStream = new System.IO.MemoryStream();
+                                    range.Save(rtfStream, DataFormats.Rtf);
+
+                                    using var xamlStream = new System.IO.MemoryStream();
+                                    System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
+                                    string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
+
+                                    byte[] rtfBytes = rtfStream.ToArray();
+                                    byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
+
+                                    int end = rtfBytes.Length;
+                                    while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
+                                        end--;
+
+                                    using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                    outStream.Write(rtfBytes, 0, end - 1);
+                                    outStream.Write(marker, 0, marker.Length);
+                                    outStream.WriteByte((byte)'}');
+                                    outStream.Write(rtfBytes, end, rtfBytes.Length - end);
+                                }
+                                else {
+                                    string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
+                                    System.IO.File.WriteAllText(dlg.FileName, text);
+                                }
+                            }
+                            catch (Exception ex) {
+                                System.Windows.MessageBox.Show(ex.ToString());
+                            }
+
+                            break;
+                        }
                 }
 
                 r.Editor.Focus();
@@ -324,6 +334,14 @@ namespace WindowsStickies.Views {
                 r.Editor.Selection.ApplyPropertyValue(TextElement.BackgroundProperty, brush);
             });
 
+            WeakReferenceMessenger.Default.Register<MainView, ClearFormattingMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                r._clearFormattingOnNextInput = true;
+                r.Editor.Focus();
+            });
+
             Editor.SelectionChanged += (s, e) => {
                 if (DataContext is ViewModels.MainViewModel vm) {
                     vm.HasSelection = !Editor.Selection.IsEmpty;
@@ -372,17 +390,23 @@ namespace WindowsStickies.Views {
 
             Editor.SizeChanged += (s, e) => {
                 Editor.Document.PageWidth = Editor.ActualWidth;
+                DrawRuledLines();
             };
 
             Editor.TextChanged += (s, e) => {
                 if (_isLoading)
                     return;
 
+                if (_clearFormattingOnNextInput)
+                    ClearFormattingOnInsertedText(e);
+
                 CleanGhostLinks();
 
                 _isTextDirty = true;
                 if (!_saveTimer.IsEnabled)
                     _saveTimer.Start();
+
+                DrawRuledLines();
             };
 
             Editor.PreviewMouseLeftButtonDown += (s, e) => {
@@ -404,6 +428,46 @@ namespace WindowsStickies.Views {
             Editor.MouseMove += (s, e) => UpdateCursor();
             Editor.PreviewKeyDown += (s, e) => UpdateCursor();
             Editor.PreviewKeyUp += (s, e) => UpdateCursor();
+
+            Editor.PreviewMouseLeftButtonDown += (s, e) => _clearFormattingOnNextInput = false;
+            Editor.PreviewKeyDown += (s, e) => {
+                if (_clearFormattingOnNextInput && IsCaretNavigationKey(e.Key))
+                    _clearFormattingOnNextInput = false;
+            };
+        }
+
+        private static bool IsCaretNavigationKey(System.Windows.Input.Key key) {
+            switch (key) {
+                case System.Windows.Input.Key.Left:
+                case System.Windows.Input.Key.Right:
+                case System.Windows.Input.Key.Up:
+                case System.Windows.Input.Key.Down:
+                case System.Windows.Input.Key.Home:
+                case System.Windows.Input.Key.End:
+                case System.Windows.Input.Key.PageUp:
+                case System.Windows.Input.Key.PageDown:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void ClearFormattingOnInsertedText(TextChangedEventArgs e) {
+            try {
+                foreach (var change in e.Changes) {
+                    if (change.AddedLength <= 0)
+                        continue;
+
+                    TextPointer? start = Editor.Document.ContentStart.GetPositionAtOffset(change.Offset);
+                    TextPointer? end = start?.GetPositionAtOffset(change.AddedLength);
+
+                    if (start is null || end is null)
+                        continue;
+
+                    new TextRange(start, end).ClearAllProperties();
+                }
+            }
+            catch { }
         }
 
         private FlowDocument CloneDocument(FlowDocument source) {
@@ -447,7 +511,7 @@ namespace WindowsStickies.Views {
                     string cleaned = run.Text.Replace(RtfMarkerText, "");
                     var bg = run.Background;
 
-                    inlines.InsertBefore(inline, new Run(cleaned.Length == 0 ? " " : cleaned) { Background = bg });
+                    inlines.InsertBefore(inline, new Run(cleaned.Length is 0 ? " " : cleaned) { Background = bg });
                     inlines.Remove(inline);
                 }
                 else if (inline is Span span)
@@ -486,7 +550,7 @@ namespace WindowsStickies.Views {
             if (foundRange is not null) {
                 Editor.Selection.Select(foundRange.Start, foundRange.End);
                 Editor.Focus();
-                
+
                 var rect = foundRange.Start.GetCharacterRect(LogicalDirection.Forward);
                 Editor.ScrollToVerticalOffset(rect.Top + Editor.VerticalOffset - (Editor.ViewportHeight / 2));
             }
@@ -494,16 +558,16 @@ namespace WindowsStickies.Views {
 
         private TextRange? FindTextInRange(TextPointer start, TextPointer end, string keyword) {
             TextPointer position = start;
-            
+
             while (position is not null && position.CompareTo(end) < 0) {
                 if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text) {
                     string textRun = position.GetTextInRun(LogicalDirection.Forward);
-                    
+
                     int index = textRun.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
                     if (index >= 0) {
                         TextPointer startPos = position.GetPositionAtOffset(index);
                         TextPointer endPos = startPos.GetPositionAtOffset(keyword.Length);
-                        
+
                         if (endPos is not null && endPos.CompareTo(end) <= 0) {
                             return new TextRange(startPos, endPos);
                         }
@@ -535,7 +599,7 @@ namespace WindowsStickies.Views {
 
         private Span? GetHyperlinkFromPointer(TextPointer pointer) {
             DependencyObject parent = pointer.Parent;
-            
+
             while (parent is Inline inline) {
                 if (inline is Span span && span.Tag is string)
                     return span;
@@ -563,9 +627,136 @@ namespace WindowsStickies.Views {
 
                     if (run.ReadLocalValue(TextElement.ForegroundProperty) is System.Windows.Media.SolidColorBrush b &&
                         b.Color == System.Windows.Media.Color.FromRgb(0, 102, 204))
-                        run.ClearValue(System.Windows.Documents.TextElement.ForegroundProperty);
+                        run.ClearValue(TextElement.ForegroundProperty);
                 }
             }
+        }
+
+        private void DrawRuledLines() {
+            RuledLinesCanvas.Children.Clear();
+
+            if (DataContext is not ViewModels.MainViewModel vm || !vm.StickyModel.IsRuledLines)
+                return;
+
+            if (ActualHeight <= 0 || ActualWidth <= 0)
+                return;
+
+            try {
+                var drawnYPositions = new HashSet<int>();
+                var allYPositions = new List<double>();
+
+                foreach (var block in Editor.Document.Blocks) {
+                    if (block is Paragraph para) {
+                        var paraStart = para.ContentStart.GetInsertionPosition(LogicalDirection.Forward);
+                        if (paraStart is null)
+                            continue;
+
+                        var pointer = paraStart;
+                        double currentLineMaxBottom = -1;
+                        double currentLineMinTop = -1;
+
+                        while (pointer is not null) {
+                            var rect = pointer.GetCharacterRect(LogicalDirection.Forward);
+
+                            if (!rect.IsEmpty) {
+                                bool isNewLine = false;
+
+                                if (currentLineMinTop < 0) {
+                                    currentLineMinTop = rect.Top;
+                                    currentLineMaxBottom = rect.Bottom;
+                                }
+                                else if (rect.Top > currentLineMaxBottom - 2) {
+                                    isNewLine = true;
+                                }
+
+                                if (isNewLine) {
+                                    int yPos = (int)Math.Round(currentLineMaxBottom);
+                                    if (!drawnYPositions.Contains(yPos)) {
+                                        drawnYPositions.Add(yPos);
+                                        allYPositions.Add(currentLineMaxBottom);
+
+                                        var line = new System.Windows.Shapes.Line {
+                                            X1 = 0,
+                                            Y1 = currentLineMaxBottom,
+                                            X2 = ActualWidth,
+                                            Y2 = currentLineMaxBottom,
+                                            Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
+                                            StrokeThickness = 1,
+                                            SnapsToDevicePixels = true
+                                        };
+                                        RuledLinesCanvas.Children.Add(line);
+                                    }
+                                    currentLineMinTop = rect.Top;
+                                    currentLineMaxBottom = rect.Bottom;
+                                }
+                                else {
+                                    currentLineMinTop = Math.Min(currentLineMinTop, rect.Top);
+                                    currentLineMaxBottom = Math.Max(currentLineMaxBottom, rect.Bottom);
+                                }
+                            }
+
+                            var nextPointer = pointer.GetNextInsertionPosition(LogicalDirection.Forward);
+                            if (nextPointer is null || nextPointer.CompareTo(pointer) <= 0)
+                                break;
+
+                            pointer = nextPointer;
+                        }
+
+                        if (currentLineMaxBottom >= 0) {
+                            int yPos = (int)Math.Round(currentLineMaxBottom);
+                            if (!drawnYPositions.Contains(yPos)) {
+                                drawnYPositions.Add(yPos);
+                                allYPositions.Add(currentLineMaxBottom);
+
+                                var line = new System.Windows.Shapes.Line {
+                                    X1 = 0,
+                                    Y1 = currentLineMaxBottom,
+                                    X2 = ActualWidth,
+                                    Y2 = currentLineMaxBottom,
+                                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
+                                    StrokeThickness = 1,
+                                    SnapsToDevicePixels = true
+                                };
+                                RuledLinesCanvas.Children.Add(line);
+                            }
+                        }
+                    }
+                }
+
+                double baseLineHeight = 12 * 1.33;
+
+                if (allYPositions.Count > 0) {
+                    double lastY = allYPositions[allYPositions.Count - 1];
+
+                    for (double y = lastY + baseLineHeight; y < ActualHeight; y += baseLineHeight) {
+                        var line = new System.Windows.Shapes.Line {
+                            X1 = 0,
+                            Y1 = y,
+                            X2 = ActualWidth,
+                            Y2 = y,
+                            Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
+                            StrokeThickness = 1,
+                            SnapsToDevicePixels = true
+                        };
+                        RuledLinesCanvas.Children.Add(line);
+                    }
+                }
+                else {
+                    for (double y = baseLineHeight; y < ActualHeight; y += baseLineHeight) {
+                        var line = new System.Windows.Shapes.Line {
+                            X1 = 0,
+                            Y1 = y,
+                            X2 = ActualWidth,
+                            Y2 = y,
+                            Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
+                            StrokeThickness = 1,
+                            SnapsToDevicePixels = true
+                        };
+                        RuledLinesCanvas.Children.Add(line);
+                    }
+                }
+            }
+            catch { }
         }
     }
 }

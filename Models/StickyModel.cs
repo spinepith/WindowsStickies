@@ -35,4 +35,7 @@ public partial class StickyModel : ObservableObject {
 
     [ObservableProperty]
     private string _text = string.Empty;
+
+    [ObservableProperty]
+    private bool _isRuledLines = false;
 }

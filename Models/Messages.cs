@@ -117,3 +117,8 @@ public class ClearSelectionBackupMessage {
     public ViewModels.MainViewModel TargetViewModel { get; }
     public ClearSelectionBackupMessage(ViewModels.MainViewModel targetViewModel) => TargetViewModel = targetViewModel;
 }
+
+///////////////////////////////////////////////////////////////////
+public class ClearFormattingMessage {
+    public ViewModels.MainViewModel? TargetViewModel { get; set; }
+}

@@ -67,7 +67,7 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     [RelayCommand]
     private void RuledLines() {
-
+        Model.IsRuledLines = !Model.IsRuledLines;
     }
     #endregion
 
@@ -105,6 +105,11 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     [RelayCommand]
     private void Find() {
         WeakReferenceMessenger.Default.Send(new Models.OpenFindTextMessage { SourceViewModel = _mainViewModel });
+    }
+
+    [RelayCommand]
+    private void ClearFormatting() {
+        WeakReferenceMessenger.Default.Send(new Models.ClearFormattingMessage { TargetViewModel = _mainViewModel });
     }
     #endregion
 

@@ -273,4 +273,7 @@
   <data name="ImportMenu_AllFormats" xml:space="preserve">
     <value>All Formats</value>
   </data>
+  <data name="Menu_Edit_ClearFormatting" xml:space="preserve">
+    <value>Clear Formatting</value>
+  </data>
 </root>
