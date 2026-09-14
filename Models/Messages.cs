@@ -6,6 +6,12 @@ public class NewStickyMessage {
     public double SourceY { get; set; }
 }
 
+public class ImportExportMessage {
+    public ViewModels.MainViewModel? SourceViewModel { get; set; }
+    public Operation Action { get; set; }
+    public enum Operation { Import, Export }
+}
+
 public class OpenFindTextMessage {
     public ViewModels.MainViewModel? SourceViewModel { get; set; }
 }

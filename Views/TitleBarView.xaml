@@ -65,8 +65,8 @@
                         <Separator />
 
                         <MenuItem Header="{Binding [Menu_File], Source={x:Static locales:Localizer.Instance}}">
-                            <MenuItem Header="{Binding [Menu_File_Import], Source={x:Static locales:Localizer.Instance}}" />
-                            <MenuItem Header="{Binding [Menu_File_Export], Source={x:Static locales:Localizer.Instance}}" />
+                            <MenuItem Header="{Binding [Menu_File_Import], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ImportCommand}"/>
+                            <MenuItem Header="{Binding [Menu_File_Export], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ExportCommand}"/>
                             <Separator />
                             <MenuItem Header="{Binding [Menu_File_RuledLines], Source={x:Static locales:Localizer.Instance}}" />
                         </MenuItem>

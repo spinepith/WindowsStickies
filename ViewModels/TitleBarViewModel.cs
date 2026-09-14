@@ -56,13 +56,13 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     #region FILE
     [RelayCommand]
-    private void ImportText() {
-
+    private void Import() {
+        WeakReferenceMessenger.Default.Send(new Models.ImportExportMessage { SourceViewModel = _mainViewModel, Action = Models.ImportExportMessage.Operation.Import });
     }
 
     [RelayCommand]
-    private void ExportText() {
-
+    private void Export() {
+        WeakReferenceMessenger.Default.Send(new Models.ImportExportMessage { SourceViewModel = _mainViewModel, Action = Models.ImportExportMessage.Operation.Export });
     }
 
     [RelayCommand]

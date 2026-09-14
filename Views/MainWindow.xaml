@@ -10,6 +10,8 @@
         mc:Ignorable="d"
         Width="240"
         Height="240"
+        MinWidth="160"
+        MinHeight="160"
         Background="{Binding StickyModel.BackgroundColor}"
         Title="Stickies"
         Icon="/assets/icon.ico"

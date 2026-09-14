@@ -169,6 +169,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на All Formats.
+        /// </summary>
+        internal static string ImportMenu_AllFormats {
+            get {
+                return ResourceManager.GetString("ImportMenu_AllFormats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на About.
         /// </summary>
         internal static string Menu_About {

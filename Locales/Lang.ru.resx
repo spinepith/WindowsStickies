@@ -270,4 +270,7 @@
   <data name="FontPickerMenu_Apply" xml:space="preserve">
     <value>Применить</value>
   </data>
+  <data name="ImportMenu_AllFormats" xml:space="preserve">
+    <value>Все форматы</value>
+  </data>
 </root>

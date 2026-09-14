@@ -9,6 +9,8 @@ using WindowsStickies.Models;
 
 namespace WindowsStickies.Views {
     public partial class MainView : UserControl {
+        private const string RtfMarkerText = "\u00B7";
+
         private System.Windows.Threading.DispatcherTimer _saveTimer;
         private bool _isTextDirty = false;
         private bool _isLoading = false;
@@ -62,6 +64,120 @@ namespace WindowsStickies.Views {
                 if (_isTextDirty)
                     SaveRichTextToModel();
             };
+
+            WeakReferenceMessenger.Default.Register<MainView, ImportExportMessage>(this, (r, m) => {
+                if (r.DataContext != m.SourceViewModel)
+                    return;
+
+                switch (m.Action) {
+                    case ImportExportMessage.Operation.Import: {
+                        var dlg = new Microsoft.Win32.OpenFileDialog {
+                            Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
+                        };
+
+                        if (dlg.ShowDialog() is not true)
+                            return;
+
+                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+
+                        try {
+                            if (ext is ".xaml") {
+                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                                var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
+                                r.Editor.Document = doc;
+                            }
+                            else if (ext is ".rtf") {
+                                byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
+                                string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
+
+                                var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
+
+                                bool loaded = false;
+                                if (match.Success) {
+                                    try {
+                                        byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
+                                        using var xamlStream = new System.IO.MemoryStream(xamlBytes);
+                                        r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
+                                        loaded = true;
+                                    }
+                                    catch { }
+                                }
+
+                                if (!loaded) {
+                                    r.Editor.Document.Blocks.Clear();
+                                    var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
+                                    using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                                    range.Load(stream, DataFormats.Rtf);
+                                    StripRtfMarkers(r.Editor.Document.Blocks);
+                                }
+                            }
+                            else {
+                                string text = System.IO.File.ReadAllText(dlg.FileName);
+                                new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
+                            }
+                        }
+                        catch { }
+
+                        break;
+                    }
+
+                    case ImportExportMessage.Operation.Export: {
+                        var dlg = new Microsoft.Win32.SaveFileDialog {
+                            Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
+                            FileName = "note",
+                            DefaultExt = ".txt"
+                        };
+
+                        if (dlg.ShowDialog() is not true)
+                            return;
+
+                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+
+                        try {
+                            if (ext is ".xaml") {
+                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
+                            }
+                            else if (ext is ".rtf") {
+                                var exportDoc = CloneDocument(r.Editor.Document);
+                                PadEmptyParagraphsForRtf(exportDoc.Blocks);
+
+                                var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
+                                using var rtfStream = new System.IO.MemoryStream();
+                                range.Save(rtfStream, DataFormats.Rtf);
+
+                                using var xamlStream = new System.IO.MemoryStream();
+                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
+                                string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
+
+                                byte[] rtfBytes = rtfStream.ToArray();
+                                byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
+
+                                int end = rtfBytes.Length;
+                                while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
+                                    end--;
+
+                                using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                outStream.Write(rtfBytes, 0, end - 1);
+                                outStream.Write(marker, 0, marker.Length);
+                                outStream.WriteByte((byte)'}');
+                                outStream.Write(rtfBytes, end, rtfBytes.Length - end);
+                            }
+                            else {
+                                string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
+                                System.IO.File.WriteAllText(dlg.FileName, text);
+                            }
+                        }
+                        catch (Exception ex) {
+                            System.Windows.MessageBox.Show(ex.ToString());
+                        }
+
+                            break;
+                    }
+                }
+
+                r.Editor.Focus();
+            });
 
             WeakReferenceMessenger.Default.Register<MainView, FindRequestMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
@@ -254,6 +370,10 @@ namespace WindowsStickies.Views {
                 }
             };
 
+            Editor.SizeChanged += (s, e) => {
+                Editor.Document.PageWidth = Editor.ActualWidth;
+            };
+
             Editor.TextChanged += (s, e) => {
                 if (_isLoading)
                     return;
@@ -284,6 +404,55 @@ namespace WindowsStickies.Views {
             Editor.MouseMove += (s, e) => UpdateCursor();
             Editor.PreviewKeyDown += (s, e) => UpdateCursor();
             Editor.PreviewKeyUp += (s, e) => UpdateCursor();
+        }
+
+        private FlowDocument CloneDocument(FlowDocument source) {
+            using var stream = new System.IO.MemoryStream();
+            System.Windows.Markup.XamlWriter.Save(source, stream);
+            stream.Position = 0;
+            return (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
+        }
+
+        private void PadEmptyParagraphsForRtf(BlockCollection blocks) {
+            foreach (var block in blocks) {
+                if (block is Paragraph para) {
+                    string text = new TextRange(para.ContentStart, para.ContentEnd).Text;
+                    if (string.IsNullOrWhiteSpace(text)) {
+                        var bg = (para.Inlines.FirstInline?.GetValue(TextElement.BackgroundProperty) as System.Windows.Media.Brush) ?? para.Background;
+
+                        para.Inlines.Clear();
+                        para.Inlines.Add(new Run(RtfMarkerText) {
+                            Foreground = bg ?? System.Windows.Media.Brushes.Transparent,
+                            Background = bg
+                        });
+                    }
+                }
+                else if (block is Section section)
+                    PadEmptyParagraphsForRtf(section.Blocks);
+            }
+        }
+
+        private void StripRtfMarkers(BlockCollection blocks) {
+            foreach (var block in blocks) {
+                if (block is Paragraph para)
+                    StripRtfMarkersFromInlines(para.Inlines);
+                else if (block is Section section)
+                    StripRtfMarkers(section.Blocks);
+            }
+        }
+
+        private void StripRtfMarkersFromInlines(InlineCollection inlines) {
+            foreach (var inline in inlines.ToList()) {
+                if (inline is Run run && run.Text.Contains(RtfMarkerText)) {
+                    string cleaned = run.Text.Replace(RtfMarkerText, "");
+                    var bg = run.Background;
+
+                    inlines.InsertBefore(inline, new Run(cleaned.Length == 0 ? " " : cleaned) { Background = bg });
+                    inlines.Remove(inline);
+                }
+                else if (inline is Span span)
+                    StripRtfMarkersFromInlines(span.Inlines);
+            }
         }
 
         private void UpdateCursor() {
