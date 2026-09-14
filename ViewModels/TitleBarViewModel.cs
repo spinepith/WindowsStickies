@@ -136,24 +136,24 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     [RelayCommand]
     private void IncreaseFontSize() {
-        EditorAction?.Invoke(nameof(IncreaseFontSize));
+        WeakReferenceMessenger.Default.Send(new Models.IncreaseFontSizeMessage { TargetViewModel = _mainViewModel });
     }
 
     [RelayCommand]
     private void DecreaseFontSize() {
-        EditorAction?.Invoke(nameof(DecreaseFontSize));
+        WeakReferenceMessenger.Default.Send(new Models.DecreaseFontSizeMessage { TargetViewModel = _mainViewModel });
     }
 
     [RelayCommand]
     private void ZoomIn() {
         if (Model.Zoom < 4.0)
-            Model.Zoom += 0.1;
+            Model.Zoom = Math.Round(Model.Zoom + 0.1, 1);
     }
 
     [RelayCommand]
     private void ZoomOut() {
         if (Model.Zoom > 0.3)
-            Model.Zoom -= 0.1;
+            Model.Zoom = Math.Round(Model.Zoom - 0.1, 1);
     }
 
     [RelayCommand]

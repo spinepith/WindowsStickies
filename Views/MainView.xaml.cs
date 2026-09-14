@@ -63,9 +63,8 @@ namespace WindowsStickies.Views {
 
                 if (DataContext is ViewModels.MainViewModel viewModel) {
                     viewModel.StickyModel.PropertyChanged += (sender, args) => {
-                        if (args.PropertyName is nameof(viewModel.StickyModel.IsRuledLines)) {
+                        if (args.PropertyName is nameof(viewModel.StickyModel.IsRuledLines) or nameof(viewModel.StickyModel.Zoom))
                             DrawRuledLines();
-                        }
                     };
                 }
             };
@@ -426,6 +425,40 @@ namespace WindowsStickies.Views {
                 r.Editor.Focus();
             });
 
+            WeakReferenceMessenger.Default.Register<MainView, IncreaseFontSizeMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                if (r.Editor.Selection.IsEmpty)
+                    return;
+
+                var currentSize = r.Editor.Selection.GetPropertyValue(TextElement.FontSizeProperty);
+                double fontSize = 12.0;
+
+                if (currentSize != DependencyProperty.UnsetValue && currentSize is double size)
+                    fontSize = size;
+
+                fontSize = Math.Min(fontSize + 1, 100);
+                r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, DecreaseFontSizeMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                if (r.Editor.Selection.IsEmpty)
+                    return;
+
+                var currentSize = r.Editor.Selection.GetPropertyValue(TextElement.FontSizeProperty);
+                double fontSize = 12.0;
+
+                if (currentSize != DependencyProperty.UnsetValue && currentSize is double size)
+                    fontSize = size;
+
+                fontSize = Math.Max(fontSize - 1, 8);
+                r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
+            });
+
             WeakReferenceMessenger.Default.Register<MainView, BackupSelectionMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
                     return;
@@ -568,8 +601,32 @@ namespace WindowsStickies.Views {
             };
 
             Editor.MouseMove += (s, e) => UpdateCursor();
-            Editor.PreviewKeyDown += (s, e) => UpdateCursor();
             Editor.PreviewKeyUp += (s, e) => UpdateCursor();
+            
+            Editor.PreviewKeyDown += (s, e) => {
+                UpdateCursor();
+
+                if (_clearFormattingOnNextInput && IsCaretNavigationKey(e.Key))
+                    _clearFormattingOnNextInput = false;
+
+                if (e.Key == System.Windows.Input.Key.Down &&
+                    System.Windows.Input.Keyboard.Modifiers is System.Windows.Input.ModifierKeys.None or System.Windows.Input.ModifierKeys.Shift) {
+
+                    Editor.CaretPosition.GetLineStartPosition(1, out int linesMoved);
+                    if (linesMoved == 0) {
+                        bool extendSelection = System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift;
+                        var end = Editor.Document.ContentEnd;
+
+                        if (extendSelection)
+                            Editor.Selection.Select(Editor.Selection.Start, end);
+                        else
+                            Editor.Selection.Select(end, end);
+
+                        Editor.CaretPosition = end;
+                        e.Handled = true;
+                    }
+                }
+            };
 
             Editor.PreviewMouseLeftButtonDown += (s, e) => _clearFormattingOnNextInput = false;
             Editor.PreviewKeyDown += (s, e) => {
@@ -793,6 +850,26 @@ namespace WindowsStickies.Views {
             if (ActualHeight <= 0 || ActualWidth <= 0)
                 return;
 
+            double zoom = vm.StickyModel.Zoom;
+            if (zoom <= 0)
+                zoom = 1;
+
+            double localHeight = ActualHeight / zoom;
+
+            void AddLine(double localY) {
+                double y = localY * zoom;
+                var line = new System.Windows.Shapes.Line {
+                    X1 = 0,
+                    Y1 = y,
+                    X2 = ActualWidth,
+                    Y2 = y,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
+                    StrokeThickness = 1,
+                    SnapsToDevicePixels = true
+                };
+                RuledLinesCanvas.Children.Add(line);
+            }
+
             try {
                 var drawnYPositions = new HashSet<int>();
                 var allYPositions = new List<double>();
@@ -817,26 +894,15 @@ namespace WindowsStickies.Views {
                                     currentLineMinTop = rect.Top;
                                     currentLineMaxBottom = rect.Bottom;
                                 }
-                                else if (rect.Top > currentLineMaxBottom - 2) {
+                                else if (rect.Top > currentLineMaxBottom - 2)
                                     isNewLine = true;
-                                }
 
                                 if (isNewLine) {
                                     int yPos = (int)Math.Round(currentLineMaxBottom);
                                     if (!drawnYPositions.Contains(yPos)) {
                                         drawnYPositions.Add(yPos);
                                         allYPositions.Add(currentLineMaxBottom);
-
-                                        var line = new System.Windows.Shapes.Line {
-                                            X1 = 0,
-                                            Y1 = currentLineMaxBottom,
-                                            X2 = ActualWidth,
-                                            Y2 = currentLineMaxBottom,
-                                            Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
-                                            StrokeThickness = 1,
-                                            SnapsToDevicePixels = true
-                                        };
-                                        RuledLinesCanvas.Children.Add(line);
+                                        AddLine(currentLineMaxBottom);
                                     }
                                     currentLineMinTop = rect.Top;
                                     currentLineMaxBottom = rect.Bottom;
@@ -859,17 +925,7 @@ namespace WindowsStickies.Views {
                             if (!drawnYPositions.Contains(yPos)) {
                                 drawnYPositions.Add(yPos);
                                 allYPositions.Add(currentLineMaxBottom);
-
-                                var line = new System.Windows.Shapes.Line {
-                                    X1 = 0,
-                                    Y1 = currentLineMaxBottom,
-                                    X2 = ActualWidth,
-                                    Y2 = currentLineMaxBottom,
-                                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
-                                    StrokeThickness = 1,
-                                    SnapsToDevicePixels = true
-                                };
-                                RuledLinesCanvas.Children.Add(line);
+                                AddLine(currentLineMaxBottom);
                             }
                         }
                     }
@@ -879,33 +935,12 @@ namespace WindowsStickies.Views {
 
                 if (allYPositions.Count > 0) {
                     double lastY = allYPositions[allYPositions.Count - 1];
-
-                    for (double y = lastY + baseLineHeight; y < ActualHeight; y += baseLineHeight) {
-                        var line = new System.Windows.Shapes.Line {
-                            X1 = 0,
-                            Y1 = y,
-                            X2 = ActualWidth,
-                            Y2 = y,
-                            Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
-                            StrokeThickness = 1,
-                            SnapsToDevicePixels = true
-                        };
-                        RuledLinesCanvas.Children.Add(line);
-                    }
+                    for (double y = lastY + baseLineHeight; y < localHeight; y += baseLineHeight)
+                        AddLine(y);
                 }
                 else {
-                    for (double y = baseLineHeight; y < ActualHeight; y += baseLineHeight) {
-                        var line = new System.Windows.Shapes.Line {
-                            X1 = 0,
-                            Y1 = y,
-                            X2 = ActualWidth,
-                            Y2 = y,
-                            Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
-                            StrokeThickness = 1,
-                            SnapsToDevicePixels = true
-                        };
-                        RuledLinesCanvas.Children.Add(line);
-                    }
+                    for (double y = baseLineHeight; y < localHeight; y += baseLineHeight)
+                        AddLine(y);
                 }
             }
             catch { }

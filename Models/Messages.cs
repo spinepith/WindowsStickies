@@ -141,3 +141,11 @@ public class FontStyleMessage {
     public ViewModels.MainViewModel? TargetViewModel { get; set; }
     public string StyleName { get; set; } = "";
 }
+
+public class IncreaseFontSizeMessage {
+    public ViewModels.MainViewModel? TargetViewModel { get; set; }
+}
+
+public class DecreaseFontSizeMessage {
+    public ViewModels.MainViewModel? TargetViewModel { get; set; }
+}

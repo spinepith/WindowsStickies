@@ -21,16 +21,16 @@
 
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding TitleBar.NewStickyCommand}"/>
-        <KeyBinding Gesture="Ctrl+Shift+V" Command=""/>
-        <KeyBinding Gesture="Ctrl+D" Command=""/>
+        <KeyBinding Gesture="Ctrl+Shift+V" Command="{Binding TitleBar.EditTextCommand}" CommandParameter="PasteWithoutFormatting"/>
+        <KeyBinding Gesture="Ctrl+D" Command="{Binding TitleBar.EditTextCommand}" CommandParameter="Delete"/>
         <KeyBinding Gesture="Ctrl+F" Command="{Binding TitleBar.FindCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding TitleBar.ShowAllFontsCommand}"/>
-        <KeyBinding Gesture="Ctrl+T" Command=""/>
+        <KeyBinding Gesture="Ctrl+T" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Strikethrough"/>
         <KeyBinding Gesture="Ctrl+K" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Hyperlink"/>
-        <KeyBinding Gesture="Ctrl+OemPlus" Command=""/>
-        <KeyBinding Gesture="Ctrl+OemMinus" Command=""/>
-        <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command=""/>
-        <KeyBinding Gesture="Ctrl+Shift+OemMinus" Command=""/>
+        <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding TitleBar.IncreaseFontSizeCommand}"/>
+        <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding TitleBar.DecreaseFontSizeCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command="{Binding TitleBar.ZoomInCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+OemMinus" Command="{Binding TitleBar.ZoomOutCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+C" Command="{Binding TitleBar.FontColorCommand}"/>
     </Window.InputBindings>
 
