@@ -122,3 +122,22 @@ public class ClearSelectionBackupMessage {
 public class ClearFormattingMessage {
     public ViewModels.MainViewModel? TargetViewModel { get; set; }
 }
+
+public class EditCommandMessage {
+    public ViewModels.MainViewModel? TargetViewModel { get; set; }
+    public EditCommand Command { get; set; }
+
+    public enum EditCommand {
+        Cut,
+        Copy,
+        Paste,
+        PasteWithoutFormatting,
+        Delete,
+        SelectAll
+    }
+}
+
+public class FontStyleMessage {
+    public ViewModels.MainViewModel? TargetViewModel { get; set; }
+    public string StyleName { get; set; } = "";
+}

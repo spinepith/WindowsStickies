@@ -81,111 +81,201 @@ namespace WindowsStickies.Views {
 
                 switch (m.Action) {
                     case ImportExportMessage.Operation.Import: {
-                            var dlg = new Microsoft.Win32.OpenFileDialog {
-                                Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
-                            };
+                        var dlg = new Microsoft.Win32.OpenFileDialog {
+                            Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
+                        };
 
-                            if (dlg.ShowDialog() is not true)
-                                return;
+                        if (dlg.ShowDialog() is not true)
+                            return;
 
-                            string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
 
-                            try {
-                                if (ext is ".xaml") {
+                        try {
+                            if (ext is ".xaml") {
+                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                                var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
+                                r.Editor.Document = doc;
+                            }
+                            else if (ext is ".rtf") {
+                                byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
+                                string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
+
+                                var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
+
+                                bool loaded = false;
+                                if (match.Success) {
+                                    try {
+                                        byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
+                                        using var xamlStream = new System.IO.MemoryStream(xamlBytes);
+                                        r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
+                                        loaded = true;
+                                    }
+                                    catch { }
+                                }
+
+                                if (!loaded) {
+                                    r.Editor.Document.Blocks.Clear();
+                                    var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
                                     using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                                    var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
-                                    r.Editor.Document = doc;
-                                }
-                                else if (ext is ".rtf") {
-                                    byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
-                                    string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
-
-                                    var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
-
-                                    bool loaded = false;
-                                    if (match.Success) {
-                                        try {
-                                            byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
-                                            using var xamlStream = new System.IO.MemoryStream(xamlBytes);
-                                            r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
-                                            loaded = true;
-                                        }
-                                        catch { }
-                                    }
-
-                                    if (!loaded) {
-                                        r.Editor.Document.Blocks.Clear();
-                                        var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
-                                        using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                                        range.Load(stream, DataFormats.Rtf);
-                                        StripRtfMarkers(r.Editor.Document.Blocks);
-                                    }
-                                }
-                                else {
-                                    string text = System.IO.File.ReadAllText(dlg.FileName);
-                                    new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
+                                    range.Load(stream, DataFormats.Rtf);
+                                    StripRtfMarkers(r.Editor.Document.Blocks);
                                 }
                             }
-                            catch { }
-
-                            break;
+                            else {
+                                string text = System.IO.File.ReadAllText(dlg.FileName);
+                                new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
+                            }
                         }
+                        catch { }
+
+                        break;
+                    }
 
                     case ImportExportMessage.Operation.Export: {
-                            var dlg = new Microsoft.Win32.SaveFileDialog {
-                                Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
-                                FileName = "note",
-                                DefaultExt = ".txt"
-                            };
+                        var dlg = new Microsoft.Win32.SaveFileDialog {
+                            Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
+                            FileName = "note",
+                            DefaultExt = ".txt"
+                        };
 
-                            if (dlg.ShowDialog() is not true)
-                                return;
+                        if (dlg.ShowDialog() is not true)
+                            return;
 
-                            string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
 
-                            try {
-                                if (ext is ".xaml") {
-                                    using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                                    System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
-                                }
-                                else if (ext is ".rtf") {
-                                    var exportDoc = CloneDocument(r.Editor.Document);
-                                    PadEmptyParagraphsForRtf(exportDoc.Blocks);
-
-                                    var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
-                                    using var rtfStream = new System.IO.MemoryStream();
-                                    range.Save(rtfStream, DataFormats.Rtf);
-
-                                    using var xamlStream = new System.IO.MemoryStream();
-                                    System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
-                                    string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
-
-                                    byte[] rtfBytes = rtfStream.ToArray();
-                                    byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
-
-                                    int end = rtfBytes.Length;
-                                    while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
-                                        end--;
-
-                                    using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                                    outStream.Write(rtfBytes, 0, end - 1);
-                                    outStream.Write(marker, 0, marker.Length);
-                                    outStream.WriteByte((byte)'}');
-                                    outStream.Write(rtfBytes, end, rtfBytes.Length - end);
-                                }
-                                else {
-                                    string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
-                                    System.IO.File.WriteAllText(dlg.FileName, text);
-                                }
+                        try {
+                            if (ext is ".xaml") {
+                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
                             }
-                            catch (Exception ex) {
-                                System.Windows.MessageBox.Show(ex.ToString());
-                            }
+                            else if (ext is ".rtf") {
+                                var exportDoc = CloneDocument(r.Editor.Document);
+                                PadEmptyParagraphsForRtf(exportDoc.Blocks);
 
-                            break;
+                                var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
+                                using var rtfStream = new System.IO.MemoryStream();
+                                range.Save(rtfStream, DataFormats.Rtf);
+
+                                using var xamlStream = new System.IO.MemoryStream();
+                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
+                                string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
+
+                                byte[] rtfBytes = rtfStream.ToArray();
+                                byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
+
+                                int end = rtfBytes.Length;
+                                while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
+                                    end--;
+
+                                using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                outStream.Write(rtfBytes, 0, end - 1);
+                                outStream.Write(marker, 0, marker.Length);
+                                outStream.WriteByte((byte)'}');
+                                outStream.Write(rtfBytes, end, rtfBytes.Length - end);
+                            }
+                            else {
+                                string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
+                                System.IO.File.WriteAllText(dlg.FileName, text);
+                            }
                         }
+                        catch (Exception ex) {
+                            MessageBox.Show(ex.ToString());
+                        }
+
+                        break;
+                    }
                 }
 
+                r.Editor.Focus();
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, EditCommandMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                switch (m.Command) {
+                    case EditCommandMessage.EditCommand.Cut:
+                        System.Windows.Input.ApplicationCommands.Cut.Execute(null, r.Editor);
+                        break;
+
+                    case EditCommandMessage.EditCommand.Copy:
+                        System.Windows.Input.ApplicationCommands.Copy.Execute(null, r.Editor);
+                        break;
+
+                    case EditCommandMessage.EditCommand.Paste:
+                        try {
+                            var selection = r.Editor.Selection;
+
+                            if (Clipboard.ContainsData(DataFormats.XamlPackage)) {
+                                var stream = Clipboard.GetData(DataFormats.XamlPackage) as System.IO.MemoryStream;
+                                if (stream is not null) {
+                                    selection.Load(stream, DataFormats.XamlPackage);
+                                    break;
+                                }
+                            }
+
+                            if (Clipboard.ContainsData(DataFormats.Rtf)) {
+                                using var stream = new System.IO.MemoryStream();
+                                var rtfData = Clipboard.GetData(DataFormats.Rtf) as string;
+                                if (rtfData is not null) {
+                                    var bytes = System.Text.Encoding.ASCII.GetBytes(rtfData);
+                                    stream.Write(bytes, 0, bytes.Length);
+                                    stream.Position = 0;
+                                    selection.Load(stream, DataFormats.Rtf);
+                                    break;
+                                }
+                            }
+
+                            if (Clipboard.ContainsText()) {
+                                selection.Text = Clipboard.GetText();
+                            }
+                        }
+                        catch {
+                            System.Windows.Input.ApplicationCommands.Paste.Execute(null, r.Editor);
+                        }
+                        break;
+
+                    case EditCommandMessage.EditCommand.PasteWithoutFormatting:
+                        if (Clipboard.ContainsText()) {
+                            string plainText = Clipboard.GetText();
+
+                            r.Editor.Selection.Text = plainText;
+
+                            TextPointer insertEnd = r.Editor.Selection.End;
+                            TextPointer? insertStart = insertEnd.GetPositionAtOffset(-plainText.Length, LogicalDirection.Backward);
+
+                            if (insertStart != null)
+                                new TextRange(insertStart, insertEnd).ClearAllProperties();
+
+                            r._clearFormattingOnNextInput = true;
+                        }
+                        break;
+
+                    case EditCommandMessage.EditCommand.Delete:
+                        if (!r.Editor.Selection.IsEmpty)
+                            r.Editor.Selection.Text = "";
+                        else
+                            System.Windows.Input.ApplicationCommands.Delete.Execute(null, r.Editor);
+                        break;
+
+                    case EditCommandMessage.EditCommand.SelectAll:
+                        System.Windows.Input.ApplicationCommands.SelectAll.Execute(null, r.Editor);
+                        break;
+                }
+                r.Editor.Focus();
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, ClearFormattingMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                if (!r.Editor.Selection.IsEmpty) {
+                    r.Editor.Selection.ClearAllProperties();
+                    r._clearFormattingOnNextInput = true;
+                }
+                else {
+                    r._clearFormattingOnNextInput = true;
+                }
                 r.Editor.Focus();
             });
 
@@ -194,6 +284,52 @@ namespace WindowsStickies.Views {
                     return;
 
                 r.FindAndSelectText(m.SearchText);
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, FontStyleMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                switch (m.StyleName) {
+                    case "Bold":
+                        var boldValue = r.Editor.Selection.GetPropertyValue(TextElement.FontWeightProperty);
+                        if (boldValue != DependencyProperty.UnsetValue && (FontWeight)boldValue == FontWeights.Bold)
+                            r.Editor.Selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+                        else
+                            r.Editor.Selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+                        break;
+
+                    case "Italic":
+                        var italicValue = r.Editor.Selection.GetPropertyValue(TextElement.FontStyleProperty);
+                        if (italicValue != DependencyProperty.UnsetValue && (FontStyle)italicValue == FontStyles.Italic)
+                            r.Editor.Selection.ApplyPropertyValue(TextElement.FontStyleProperty, FontStyles.Normal);
+                        else
+                            r.Editor.Selection.ApplyPropertyValue(TextElement.FontStyleProperty, FontStyles.Italic);
+                        break;
+
+                    case "Underline": {
+                        var value = r.Editor.Selection.GetPropertyValue(Inline.TextDecorationsProperty);
+                        bool isUnderlined = value is TextDecorationCollection col &&
+                                                col.Any(d => d.Location == TextDecorationLocation.Underline);
+
+                        r.Editor.Selection.ApplyPropertyValue(
+                            Inline.TextDecorationsProperty,
+                            isUnderlined ? (object)DependencyProperty.UnsetValue : TextDecorations.Underline);
+                        break;
+                    }
+
+                    case "Strikethrough": {
+                        var value = r.Editor.Selection.GetPropertyValue(Inline.TextDecorationsProperty);
+                        bool isStrike = value is TextDecorationCollection col &&
+                                            col.Any(d => d.Location == TextDecorationLocation.Strikethrough);
+
+                        r.Editor.Selection.ApplyPropertyValue(
+                            Inline.TextDecorationsProperty,
+                            isStrike ? (object)DependencyProperty.UnsetValue : TextDecorations.Strikethrough);
+                        break;
+                    }
+                }
+                r.Editor.Focus();
             });
 
             WeakReferenceMessenger.Default.Register<MainView, ChangeFontFamilyMessage>(this, (r, m) => {
@@ -235,10 +371,16 @@ namespace WindowsStickies.Views {
                         Span? cutLink2 = r.GetHyperlinkFromPointer(r.Editor.Selection.End);
 
                         if (cutLink1 is not null) {
+                            var r1 = new TextRange(cutLink1.ContentStart, cutLink1.ContentEnd);
+                            r1.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
+                            r1.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
                             cutLink1.Tag = null;
                             cutLink1.Style = null;
                         }
                         if (cutLink2 is not null) {
+                            var r2 = new TextRange(cutLink2.ContentStart, cutLink2.ContentEnd);
+                            r2.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
+                            r2.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
                             cutLink2.Tag = null;
                             cutLink2.Style = null;
                         }
@@ -268,6 +410,14 @@ namespace WindowsStickies.Views {
                         string plainText = new TextRange(link.ContentStart, link.ContentEnd).Text;
                         r.Editor.Selection.Select(link.ElementStart, link.ElementEnd);
                         r.Editor.Selection.Text = plainText;
+
+                        var newEnd = r.Editor.CaretPosition;
+                        var newStart = newEnd.GetPositionAtOffset(-plainText.Length, LogicalDirection.Backward);
+                        if (newStart != null) {
+                            var newRange = new TextRange(newStart, newEnd);
+                            newRange.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
+                            newRange.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
+                        }
 
                         link.Tag = null;
                         link.Style = null;
@@ -332,14 +482,6 @@ namespace WindowsStickies.Views {
 
                 var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
                 r.Editor.Selection.ApplyPropertyValue(TextElement.BackgroundProperty, brush);
-            });
-
-            WeakReferenceMessenger.Default.Register<MainView, ClearFormattingMessage>(this, (r, m) => {
-                if (r.DataContext != m.TargetViewModel)
-                    return;
-
-                r._clearFormattingOnNextInput = true;
-                r.Editor.Focus();
             });
 
             Editor.SelectionChanged += (s, e) => {
@@ -463,6 +605,9 @@ namespace WindowsStickies.Views {
 
                     if (start is null || end is null)
                         continue;
+
+                    //if (GetHyperlinkFromPointer(start) is not null || GetHyperlinkFromPointer(end) is not null)
+                    //    continue;
 
                     new TextRange(start, end).ClearAllProperties();
                 }
@@ -615,19 +760,26 @@ namespace WindowsStickies.Views {
                 return;
 
             var runs = new[] {
-                    pointer.Parent as Run,
-                    pointer.GetAdjacentElement(LogicalDirection.Forward) as Run,
-                    pointer.GetAdjacentElement(LogicalDirection.Backward) as Run
-                };
+                pointer.Parent as Run,
+                pointer.GetAdjacentElement(LogicalDirection.Forward) as Run,
+                pointer.GetAdjacentElement(LogicalDirection.Backward) as Run
+            };
 
             foreach (var run in runs) {
-                if (run is not null) {
-                    if (run.ReadLocalValue(Inline.TextDecorationsProperty) != DependencyProperty.UnsetValue)
-                        run.ClearValue(Inline.TextDecorationsProperty);
+                if (run is null)
+                    continue;
 
-                    if (run.ReadLocalValue(TextElement.ForegroundProperty) is System.Windows.Media.SolidColorBrush b &&
-                        b.Color == System.Windows.Media.Color.FromRgb(0, 102, 204))
-                        run.ClearValue(TextElement.ForegroundProperty);
+                bool isLinkBlue =
+                    run.ReadLocalValue(TextElement.ForegroundProperty) is System.Windows.Media.SolidColorBrush b &&
+                    b.Color == System.Windows.Media.Color.FromRgb(0, 102, 204);
+
+                bool isUnderlined =
+                    run.ReadLocalValue(Inline.TextDecorationsProperty) is TextDecorationCollection col &&
+                    col.Any(d => d.Location == TextDecorationLocation.Underline);
+
+                if (isLinkBlue && isUnderlined) {
+                    run.ClearValue(Inline.TextDecorationsProperty);
+                    run.ClearValue(TextElement.ForegroundProperty);
                 }
             }
         }

@@ -75,12 +75,12 @@
                         </MenuItem>
 
                         <MenuItem Header="{Binding [Menu_Edit], Source={x:Static locales:Localizer.Instance}}">
-                            <MenuItem Header="{Binding [Menu_Edit_Cut], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+X"/>
-                            <MenuItem Header="{Binding [Menu_Edit_Copy], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+C"/>
-                            <MenuItem Header="{Binding [Menu_Edit_Paste], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+V"/>
-                            <MenuItem Header="{Binding [Menu_Edit_PasteWithoutFormatting], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+V"/>
-                            <MenuItem Header="{Binding [Menu_Edit_Delete], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+D"/>
-                            <MenuItem Header="{Binding [Menu_Edit_SelectAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+A"/>
+                            <MenuItem Header="{Binding [Menu_Edit_Cut], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+X" Command="{Binding EditTextCommand}" CommandParameter="Cut"/>
+                            <MenuItem Header="{Binding [Menu_Edit_Copy], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+C" Command="{Binding EditTextCommand}" CommandParameter="Copy"/>
+                            <MenuItem Header="{Binding [Menu_Edit_Paste], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+V" Command="{Binding EditTextCommand}" CommandParameter="Paste"/>
+                            <MenuItem Header="{Binding [Menu_Edit_PasteWithoutFormatting], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+V" Command="{Binding EditTextCommand}" CommandParameter="PasteWithoutFormatting"/>
+                            <MenuItem Header="{Binding [Menu_Edit_Delete], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+D" Command="{Binding EditTextCommand}" CommandParameter="Delete"/>
+                            <MenuItem Header="{Binding [Menu_Edit_SelectAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+A" Command="{Binding EditTextCommand}" CommandParameter="SelectAll"/>
                             <MenuItem Header="{Binding [Menu_Edit_ClearFormatting], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Space" Command="{Binding ClearFormattingCommand}"/>
                             <Separator />
                             <MenuItem Header="{Binding [Menu_Edit_Find], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+F" Command="{Binding FindCommand}"/>
@@ -89,16 +89,16 @@
                         <MenuItem Header="{Binding [Menu_Font], Source={x:Static locales:Localizer.Instance}}">
                             <MenuItem Header="{Binding [Menu_Font_ShowFonts], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+T" Command="{Binding ShowAllFontsCommand}"/>
                             <Separator />
-                            <MenuItem Header="{Binding [Menu_Font_Bold], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+B"/>
-                            <MenuItem Header="{Binding [Menu_Font_Italic], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+I"/>
-                            <MenuItem Header="{Binding [Menu_Font_Underline], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+U"/>
-                            <MenuItem Header="{Binding [Menu_Font_Strikethrough], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+T"/>
-                            <MenuItem Header="{Binding [Menu_Font_Hyperlink], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+K"/>
+                            <MenuItem Header="{Binding [Menu_Font_Bold], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+B" Command="{Binding SetFontStyleCommand}" CommandParameter="Bold"/>
+                            <MenuItem Header="{Binding [Menu_Font_Italic], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+I" Command="{Binding SetFontStyleCommand}" CommandParameter="Italic"/>
+                            <MenuItem Header="{Binding [Menu_Font_Underline], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+U" Command="{Binding SetFontStyleCommand}" CommandParameter="Underline"/>
+                            <MenuItem Header="{Binding [Menu_Font_Strikethrough], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+T" Command="{Binding SetFontStyleCommand}" CommandParameter="Strikethrough"/>
+                            <MenuItem Header="{Binding [Menu_Font_Hyperlink], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+K" Command="{Binding SetFontStyleCommand}" CommandParameter="Hyperlink"/>
                             <Separator />
-                            <MenuItem Header="{Binding [Menu_Font_Increase], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl++"/>
-                            <MenuItem Header="{Binding [Menu_Font_Decrease], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+-"/>
-                            <MenuItem Header="{Binding [Menu_Font_IncreaseAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift++"/>
-                            <MenuItem Header="{Binding [Menu_Font_DecreaseAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+-"/>
+                            <MenuItem Header="{Binding [Menu_Font_Increase], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl++" Command="{Binding IncreaseFontSizeCommand}"/>
+                            <MenuItem Header="{Binding [Menu_Font_Decrease], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+-" Command="{Binding DecreaseFontSizeCommand}"/>
+                            <MenuItem Header="{Binding [Menu_Font_IncreaseAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift++" Command="{Binding ZoomInCommand}"/>
+                            <MenuItem Header="{Binding [Menu_Font_DecreaseAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+-" Command="{Binding ZoomOutCommand}"/>
                             <Separator />
                             <MenuItem Header="{Binding [Menu_Font_Color], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+C" Command="{Binding FontColorCommand}"/>
                             <MenuItem Header="{Binding [Menu_Font_HighlightColor], Source={x:Static locales:Localizer.Instance}}" Command="{Binding HighlightColorCommand}"/>

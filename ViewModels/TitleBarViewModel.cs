@@ -73,33 +73,33 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     #region EDIT
     [RelayCommand]
-    private void Cut() {
+    private void EditText(string commandName) {
+        Models.EditCommandMessage.EditCommand command;
 
-    }
+        switch (commandName) {
+            case "Cut":
+                command = Models.EditCommandMessage.EditCommand.Cut;
+                break;
+            case "Copy":
+                command = Models.EditCommandMessage.EditCommand.Copy;
+                break;
+            case "Paste":
+                command = Models.EditCommandMessage.EditCommand.Paste;
+                break;
+            case "PasteWithoutFormatting":
+                command = Models.EditCommandMessage.EditCommand.PasteWithoutFormatting;
+                break;
+            case "Delete":
+                command = Models.EditCommandMessage.EditCommand.Delete;
+                break;
+            case "SelectAll":
+                command = Models.EditCommandMessage.EditCommand.SelectAll;
+                break;
+            default:
+                return;
+        }
 
-    [RelayCommand]
-    private void Copy() {
-
-    }
-
-    [RelayCommand]
-    private void Paste() {
-
-    }
-
-    [RelayCommand]
-    private void PasteWithoutFormatting() {
-
-    }
-
-    [RelayCommand]
-    private void DeleteText() {
-
-    }
-
-    [RelayCommand]
-    private void SelectAll() {
-
+        WeakReferenceMessenger.Default.Send(new Models.EditCommandMessage { TargetViewModel = _mainViewModel, Command = command });
     }
 
     [RelayCommand]
@@ -124,6 +124,12 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
         switch (styleName) {
             case "Hyperlink":
                 WeakReferenceMessenger.Default.Send(new Models.OpenHyperlinkMessage { SourceViewModel = _mainViewModel });
+                break;
+            case "Bold":
+            case "Italic":
+            case "Underline":
+            case "Strikethrough":
+                WeakReferenceMessenger.Default.Send(new Models.FontStyleMessage { TargetViewModel = _mainViewModel, StyleName = styleName });
                 break;
         }
     }
