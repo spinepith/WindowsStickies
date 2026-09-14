@@ -83,7 +83,7 @@
                         </MenuItem>
 
                         <MenuItem Header="{Binding [Menu_Font], Source={x:Static locales:Localizer.Instance}}">
-                            <MenuItem Header="{Binding [Menu_Font_ShowFonts], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+T"/>
+                            <MenuItem Header="{Binding [Menu_Font_ShowFonts], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+T" Command="{Binding ShowAllFontsCommand}"/>
                             <Separator />
                             <MenuItem Header="{Binding [Menu_Font_Bold], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+B"/>
                             <MenuItem Header="{Binding [Menu_Font_Italic], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+I"/>

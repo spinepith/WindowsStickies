@@ -14,6 +14,7 @@ namespace WindowsStickies.Styles {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MenuItemRadius)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PopupRadius)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ButtonRadius)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ListBoxRadius)));
                 }
             };
         }
@@ -21,5 +22,6 @@ namespace WindowsStickies.Styles {
         public CornerRadius MenuItemRadius => Services.SettingsService.Instance.IsRoundedCorners ? new CornerRadius(4) : new CornerRadius(0);
         public CornerRadius PopupRadius    => Services.SettingsService.Instance.IsRoundedCorners ? new CornerRadius(8) : new CornerRadius(0);
         public CornerRadius ButtonRadius   => Services.SettingsService.Instance.IsRoundedCorners ? new CornerRadius(8) : new CornerRadius(0);
+        public CornerRadius ListBoxRadius  => Services.SettingsService.Instance.IsRoundedCorners ? new CornerRadius(8) : new CornerRadius(0);
     }
 }

@@ -10,6 +10,10 @@ public class OpenFindTextMessage {
     public ViewModels.MainViewModel? SourceViewModel { get; set; }
 }
 
+public class OpenFontPickerMessage {
+    public ViewModels.MainViewModel? SourceViewModel { get; set; }
+}
+
 public class OpenHyperlinkMessage {
     public ViewModels.MainViewModel? SourceViewModel { get; set; }
 }
@@ -33,6 +37,26 @@ public class FindRequestMessage {
     public FindRequestMessage(ViewModels.MainViewModel targetViewModel, string searchText) {
         TargetViewModel = targetViewModel;
         SearchText = searchText;
+    }
+}
+
+public class ChangeFontFamilyMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public System.Windows.Media.FontFamily FontFamily { get; }
+
+    public ChangeFontFamilyMessage(ViewModels.MainViewModel targetViewModel, System.Windows.Media.FontFamily fontFamily) {
+        TargetViewModel = targetViewModel;
+        FontFamily = fontFamily;
+    }
+}
+
+public class ChangeFontSizeMessage {
+    public ViewModels.MainViewModel TargetViewModel { get; }
+    public double FontSize { get; }
+
+    public ChangeFontSizeMessage(ViewModels.MainViewModel targetViewModel, double fontSize) {
+        TargetViewModel = targetViewModel;
+        FontSize = fontSize;
     }
 }
 

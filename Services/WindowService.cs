@@ -11,6 +11,7 @@ namespace WindowsStickies.Services;
 public class WindowService {
     public static WindowService Instance { get; } = new();
     private FindTextWindow? _findTextWindow;
+    private FontPickerWindow? _fontPickerWindow;
     private Views.HyperlinkWindow? _hyperlinkWindow;
     private ColorPickerWindow? _colorPickerWindow;
 
@@ -72,6 +73,34 @@ public class WindowService {
             };
 
             r._findTextWindow.Show();
+        });
+
+        WeakReferenceMessenger.Default.Register<WindowService, Models.OpenFontPickerMessage>(this, (r, m) => {
+            var owner = Enumerable.FirstOrDefault(Application.Current.Windows.OfType<MainWindow>(), w => w.DataContext == m.SourceViewModel);
+
+            if (r._fontPickerWindow is not null && r._fontPickerWindow.IsVisible) {
+                if (r._fontPickerWindow.WindowState == WindowState.Minimized)
+                    r._fontPickerWindow.WindowState = WindowState.Normal;
+
+                if (r._fontPickerWindow.DataContext is FontPickerViewModel vm)
+                    vm.SetupNewTarget(m.SourceViewModel);
+
+                if (owner is not null) {
+                    r._fontPickerWindow.Owner = owner;
+                    r._fontPickerWindow.Left = owner.Left + (owner.ActualWidth - r._fontPickerWindow.ActualWidth) / 2;
+                    r._fontPickerWindow.Top = owner.Top + (owner.ActualHeight - r._fontPickerWindow.ActualHeight) / 2;
+                }
+
+                r._fontPickerWindow.Activate();
+                return;
+            }
+
+            r._fontPickerWindow = new FontPickerWindow {
+                Owner = owner,
+                DataContext = new FontPickerViewModel(m.SourceViewModel)
+            };
+
+            r._fontPickerWindow.Show();
         });
 
         WeakReferenceMessenger.Default.Register<WindowService, Models.OpenHyperlinkMessage>(this, (r, m) => {

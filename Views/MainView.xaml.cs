@@ -35,15 +35,26 @@ namespace WindowsStickies.Views {
             Loaded += (s, e) => {
                 if (DataContext is ViewModels.MainViewModel vm && !string.IsNullOrEmpty(vm.StickyModel.Text)) {
                     _isLoading = true;
+
+                    using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(vm.StickyModel.Text));
+
                     try {
-                        var range = new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd);
-                        using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(vm.StickyModel.Text));
-                        range.Load(stream, System.Windows.DataFormats.Rtf);
+                        var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
+                        Editor.Document = doc;
                     }
                     catch {
-                        new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd).Text = vm.StickyModel.Text;
+                        stream.Position = 0;
+                        try {
+                            var range = new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd);
+                            range.Load(stream, DataFormats.Rtf);
+                        }
+                        catch {
+                            new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd).Text = vm.StickyModel.Text;
+                        }
                     }
+
                     _isLoading = false;
+                    Editor.Document.PageWidth = Editor.ActualWidth;
                 }
             };
 
@@ -57,6 +68,20 @@ namespace WindowsStickies.Views {
                     return;
 
                 r.FindAndSelectText(m.SearchText);
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, ChangeFontFamilyMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                r.Editor.Selection.ApplyPropertyValue(TextElement.FontFamilyProperty, m.FontFamily);
+            });
+
+            WeakReferenceMessenger.Default.Register<MainView, ChangeFontSizeMessage>(this, (r, m) => {
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, m.FontSize);
             });
 
             WeakReferenceMessenger.Default.Register<MainView, HyperlinkMessage>(this, (r, m) => {
@@ -229,6 +254,17 @@ namespace WindowsStickies.Views {
                 }
             };
 
+            Editor.TextChanged += (s, e) => {
+                if (_isLoading)
+                    return;
+
+                CleanGhostLinks();
+
+                _isTextDirty = true;
+                if (!_saveTimer.IsEnabled)
+                    _saveTimer.Start();
+            };
+
             Editor.PreviewMouseLeftButtonDown += (s, e) => {
                 if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
                     var position = Editor.GetPositionFromPoint(e.GetPosition(Editor), true);
@@ -245,38 +281,26 @@ namespace WindowsStickies.Views {
                 }
             };
 
-            void UpdateCursor() {
-                if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
-                    var pos = Editor.GetPositionFromPoint(System.Windows.Input.Mouse.GetPosition(Editor), true);
-                    if (pos is not null && GetHyperlinkFromPointer(pos) is not null) {
-                        Editor.Cursor = System.Windows.Input.Cursors.Hand;
-                        return;
-                    }
-                }
-                Editor.Cursor = System.Windows.Input.Cursors.IBeam;
-            }
-
-            Editor.TextChanged += (s, e) => {
-                if (_isLoading)
-                    return;
-
-                CleanGhostLinks();
-
-                _isTextDirty = true;
-                if (!_saveTimer.IsEnabled)
-                    _saveTimer.Start();
-            };
-
             Editor.MouseMove += (s, e) => UpdateCursor();
             Editor.PreviewKeyDown += (s, e) => UpdateCursor();
             Editor.PreviewKeyUp += (s, e) => UpdateCursor();
         }
 
+        private void UpdateCursor() {
+            if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
+                var pos = Editor.GetPositionFromPoint(System.Windows.Input.Mouse.GetPosition(Editor), true);
+                if (pos is not null && GetHyperlinkFromPointer(pos) is not null) {
+                    Editor.Cursor = System.Windows.Input.Cursors.Hand;
+                    return;
+                }
+            }
+            Editor.Cursor = System.Windows.Input.Cursors.IBeam;
+        }
+
         private void SaveRichTextToModel() {
             if (DataContext is ViewModels.MainViewModel vm) {
-                var range = new TextRange(Editor.Document.ContentStart, Editor.Document.ContentEnd);
                 using var stream = new System.IO.MemoryStream();
-                range.Save(stream, System.Windows.DataFormats.Rtf);
+                System.Windows.Markup.XamlWriter.Save(Editor.Document, stream);
                 vm.StickyModel.Text = System.Text.Encoding.UTF8.GetString(stream.ToArray());
             }
         }
@@ -287,9 +311,8 @@ namespace WindowsStickies.Views {
             TextPointer start = Editor.Selection.End;
             var foundRange = FindTextInRange(start, Editor.Document.ContentEnd, searchText);
 
-            if (foundRange is null) {
+            if (foundRange is null)
                 foundRange = FindTextInRange(Editor.Document.ContentStart, Editor.Document.ContentEnd, searchText);
-            }
 
             if (foundRange is not null) {
                 Editor.Selection.Select(foundRange.Start, foundRange.End);

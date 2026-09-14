@@ -53,12 +53,6 @@ internal partial class ColorPickerViewModel : BaseTitleBarViewModel {
             if (ColorConverter.ConvertFromString(colorString) is Color color)
                 SelectedColor = color;
         }
-
-        if (TargetViewModel is not null && Mode == OpenColorPickerMessage.PickerMode.BackgroundColor) {
-            _originalColor = TargetViewModel.StickyModel.BackgroundColor;
-            if (ColorConverter.ConvertFromString(_originalColor) is Color color)
-                SelectedColor = color;
-        }
     }
 
     [RelayCommand]
@@ -76,6 +70,15 @@ internal partial class ColorPickerViewModel : BaseTitleBarViewModel {
         System.Windows.Application.Current.Windows.OfType<Views.ColorPickerWindow>().FirstOrDefault()?.Close();
     }
 
+    public void RevertColorIfNotApplied() {
+        if (!_isApplied && TargetViewModel is not null) {
+            if (Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
+                TargetViewModel.StickyModel.BackgroundColor = _originalColor!;
+            else
+                WeakReferenceMessenger.Default.Send(new RestoreSelectionMessage(TargetViewModel));
+        }
+    }
+
     partial void OnSelectedColorChanged(Color value) {
         if (TargetViewModel is null)
             return;
@@ -88,14 +91,5 @@ internal partial class ColorPickerViewModel : BaseTitleBarViewModel {
 
         else if (Mode == OpenColorPickerMessage.PickerMode.HighlightColor)
             WeakReferenceMessenger.Default.Send(new ChangeHighlightColorMessage(TargetViewModel, value));
-    }
-
-    public void RevertColorIfNotApplied() {
-        if (!_isApplied && TargetViewModel is not null) {
-            if (Mode == OpenColorPickerMessage.PickerMode.BackgroundColor)
-                TargetViewModel.StickyModel.BackgroundColor = _originalColor!;
-            else
-                WeakReferenceMessenger.Default.Send(new RestoreSelectionMessage(TargetViewModel));
-        }
     }
 }

@@ -267,4 +267,7 @@
   <data name="HyperlinkMenu_Apply" xml:space="preserve">
     <value>Apply</value>
   </data>
+  <data name="FontPickerMenu_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
 </root>

@@ -21,6 +21,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Lang.resx</DependentUpon>
     </Compile>
+    <Compile Update="Views\FontPickerWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

@@ -135,6 +135,15 @@ namespace WindowsStickies.Locales {
         /// <summary>
         ///   Ищет локализованную строку, похожую на Apply.
         /// </summary>
+        internal static string FontPickerMenu_Apply {
+            get {
+                return ResourceManager.GetString("FontPickerMenu_Apply", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Apply.
+        /// </summary>
         internal static string HyperlinkMenu_Apply {
             get {
                 return ResourceManager.GetString("HyperlinkMenu_Apply", resourceCulture);

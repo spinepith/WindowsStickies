@@ -111,7 +111,7 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     #region FONT
     [RelayCommand]
     private void ShowAllFonts() {
-
+        WeakReferenceMessenger.Default.Send(new Models.OpenFontPickerMessage { SourceViewModel = _mainViewModel });
     }
 
     [RelayCommand]

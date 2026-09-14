@@ -27,10 +27,12 @@
                 <MenuItem Header="{Binding [ContextMenu_Copy], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Copy" InputGestureText=" "/>
                 <MenuItem Header="{Binding [ContextMenu_Paste], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Paste" InputGestureText=" "/>
                 <MenuItem Header="{Binding [ContextMenu_PasteWithoutFormatting], Source={x:Static locales:Localizer.Instance}}" Command="ApplicationCommands.Paste" InputGestureText=" "/>
-                <Separator/>
+                <Separator Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
+                <MenuItem Header="{Binding [Menu_Font], Source={x:Static locales:Localizer.Instance}}" Command="{Binding TitleBar.ShowAllFontsCommand}" Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}" />
+                <Separator Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
                 <MenuItem Header="{Binding [Menu_Font_Color], Source={x:Static locales:Localizer.Instance}}" Command="{Binding TitleBar.FontColorCommand}" Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}" />
                 <MenuItem Header="{Binding [Menu_Font_HighlightColor], Source={x:Static locales:Localizer.Instance}}" Command="{Binding TitleBar.HighlightColorCommand}" Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}" />
-                <Separator Visibility="{Binding HasSelection, Converter={StaticResource BoolToVis}}"/>
+                <Separator />
                 <MenuItem Header="{Binding [ContextMenu_Hyperlink], Source={x:Static locales:Localizer.Instance}}" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Hyperlink"/>
             </ContextMenu>
         </RichTextBox.ContextMenu>
