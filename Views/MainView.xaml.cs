@@ -1,6 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -9,7 +13,12 @@ using WindowsStickies.Models;
 
 namespace WindowsStickies.Views {
     public partial class MainView : UserControl {
+        private const double ScrollBarScreenWidth = 12;
         private const string RtfMarkerText = "\u00B7";
+
+        private ScrollViewer? _editorViewport;
+        private ScrollBar? _editorVerticalScrollBar;
+
 
         private System.Windows.Threading.DispatcherTimer _saveTimer;
         private bool _isTextDirty = false;
@@ -18,8 +27,14 @@ namespace WindowsStickies.Views {
         private System.IO.MemoryStream? _colorBackupStream;
         private TextPointer? _backupStart;
         private TextPointer? _backupEnd;
+        private (Span Span, string Url, FontFamily FontFamily, double FontSize, object LocalForeground, object LocalBackground)? _backupHyperlink;
 
         private bool _clearFormattingOnNextInput = false;
+
+        private bool _insertingTrailingSpaceLineBreak = false;
+
+        private readonly List<double> _ruledLineBuffer = new();
+        private bool _ruledLinesQueued;
 
         public MainView() {
             InitializeComponent();
@@ -37,6 +52,21 @@ namespace WindowsStickies.Views {
             };
 
             Loaded += (s, e) => {
+                Editor.ApplyTemplate();
+                _editorViewport = Editor.Template.FindName("PART_ContentHost", Editor) as ScrollViewer;
+                UpdateEditorScrollBarWidth();
+
+                if (_editorViewport is not null) {
+                    _editorViewport.ScrollChanged += (sv, se) => {
+                        if (se.ViewportWidthChange is not 0)
+                            UpdateEditorPageWidth();
+
+                        if (se.VerticalChange is not 0 || se.ExtentHeightChange is not 0 ||
+                            se.ViewportHeightChange is not 0 || se.ViewportWidthChange is not 0)
+                            InvalidateRuledLines();
+                    };
+                }
+
                 if (DataContext is ViewModels.MainViewModel vm && !string.IsNullOrEmpty(vm.StickyModel.Text)) {
                     _isLoading = true;
 
@@ -63,8 +93,11 @@ namespace WindowsStickies.Views {
 
                 if (DataContext is ViewModels.MainViewModel viewModel) {
                     viewModel.StickyModel.PropertyChanged += (sender, args) => {
+                        if (args.PropertyName is nameof(viewModel.StickyModel.Zoom))
+                            UpdateEditorScrollBarWidth();
+
                         if (args.PropertyName is nameof(viewModel.StickyModel.IsRuledLines) or nameof(viewModel.StickyModel.Zoom))
-                            DrawRuledLines();
+                            InvalidateRuledLines();
                     };
                 }
             };
@@ -80,109 +113,143 @@ namespace WindowsStickies.Views {
 
                 switch (m.Action) {
                     case ImportExportMessage.Operation.Import: {
-                        var dlg = new Microsoft.Win32.OpenFileDialog {
-                            Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
-                        };
+                            var dlg = new Microsoft.Win32.OpenFileDialog {
+                                Filter = $"{Locales.Localizer.Instance["AllFormats"]}|*.txt;*.rtf;*.xaml|TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml"
+                            };
 
-                        if (dlg.ShowDialog() is not true)
-                            return;
+                            if (dlg.ShowDialog() is not true)
+                                return;
 
-                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+                            string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
 
-                        try {
-                            if (ext is ".xaml") {
-                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                                var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
-                                r.Editor.Document = doc;
-                            }
-                            else if (ext is ".rtf") {
-                                byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
-                                string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
-
-                                var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
-
-                                bool loaded = false;
-                                if (match.Success) {
-                                    try {
-                                        byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
-                                        using var xamlStream = new System.IO.MemoryStream(xamlBytes);
-                                        r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
-                                        loaded = true;
-                                    }
-                                    catch { }
-                                }
-
-                                if (!loaded) {
-                                    r.Editor.Document.Blocks.Clear();
-                                    var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
+                            try {
+                                if (ext is ".xaml") {
                                     using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                                    range.Load(stream, DataFormats.Rtf);
-                                    StripRtfMarkers(r.Editor.Document.Blocks);
+                                    var doc = (FlowDocument)System.Windows.Markup.XamlReader.Load(stream);
+                                    r.Editor.Document = doc;
+                                }
+                                else if (ext is ".rtf") {
+                                    byte[] fileBytes = System.IO.File.ReadAllBytes(dlg.FileName);
+                                    string ascii = System.Text.Encoding.ASCII.GetString(fileBytes);
+
+                                    var match = System.Text.RegularExpressions.Regex.Match(ascii, @"\{\\\*\\stickynotexaml ([A-Za-z0-9+/=]+)\}");
+
+                                    bool loaded = false;
+                                    if (match.Success) {
+                                        try {
+                                            byte[] xamlBytes = Convert.FromBase64String(match.Groups[1].Value);
+                                            using var xamlStream = new System.IO.MemoryStream(xamlBytes);
+                                            r.Editor.Document = (FlowDocument)System.Windows.Markup.XamlReader.Load(xamlStream);
+                                            loaded = true;
+                                        }
+                                        catch { }
+                                    }
+
+                                    if (!loaded) {
+                                        r.Editor.Document.Blocks.Clear();
+                                        var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
+                                        using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                                        range.Load(stream, DataFormats.Rtf);
+                                        StripRtfMarkers(r.Editor.Document.Blocks);
+                                    }
+                                }
+                                else {
+                                    string text = System.IO.File.ReadAllText(dlg.FileName);
+                                    new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
                                 }
                             }
-                            else {
-                                string text = System.IO.File.ReadAllText(dlg.FileName);
-                                new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text = text;
-                            }
-                        }
-                        catch { }
+                            catch { }
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case ImportExportMessage.Operation.Export: {
-                        var dlg = new Microsoft.Win32.SaveFileDialog {
-                            Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
-                            FileName = "note",
-                            DefaultExt = ".txt"
-                        };
+                            var dlg = new Microsoft.Win32.SaveFileDialog {
+                                Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
+                                FileName = "note",
+                                DefaultExt = ".txt"
+                            };
 
-                        if (dlg.ShowDialog() is not true)
-                            return;
+                            if (dlg.ShowDialog() is not true)
+                                return;
 
-                        string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+                            string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
 
-                        try {
-                            if (ext is ".xaml") {
-                                using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
+                            try {
+                                var range = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd);
+
+                                if (ext is ".xaml") {
+                                    using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                    System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
+                                }
+                                else if (ext is ".rtf") {
+                                    using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                                    range.Save(stream, DataFormats.Rtf);
+                                }
+                                else {
+                                    string text = range.Text;
+                                    System.IO.File.WriteAllText(dlg.FileName, text);
+                                }
                             }
-                            else if (ext is ".rtf") {
-                                var exportDoc = CloneDocument(r.Editor.Document);
-                                PadEmptyParagraphsForRtf(exportDoc.Blocks);
+                            catch { }
 
-                                var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
-                                using var rtfStream = new System.IO.MemoryStream();
-                                range.Save(rtfStream, DataFormats.Rtf);
-
-                                using var xamlStream = new System.IO.MemoryStream();
-                                System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
-                                string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
-
-                                byte[] rtfBytes = rtfStream.ToArray();
-                                byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
-
-                                int end = rtfBytes.Length;
-                                while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
-                                    end--;
-
-                                using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
-                                outStream.Write(rtfBytes, 0, end - 1);
-                                outStream.Write(marker, 0, marker.Length);
-                                outStream.WriteByte((byte)'}');
-                                outStream.Write(rtfBytes, end, rtfBytes.Length - end);
-                            }
-                            else {
-                                string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
-                                System.IO.File.WriteAllText(dlg.FileName, text);
-                            }
-                        }
-                        catch (Exception ex) {
-                            MessageBox.Show(ex.ToString());
+                            break;
                         }
 
-                        break;
-                    }
+                        /* OLD EXPORT CODE */
+                        //case ImportExportMessage.Operation.Export: {
+                        //    var dlg = new Microsoft.Win32.SaveFileDialog {
+                        //        Filter = "TXT (*.txt)|*.txt|RTF (*.rtf)|*.rtf|XAML (*.xaml)|*.xaml",
+                        //        FileName = "note",
+                        //        DefaultExt = ".txt"
+                        //    };
+
+                        //    if (dlg.ShowDialog() is not true)
+                        //        return;
+
+                        //    string ext = System.IO.Path.GetExtension(dlg.FileName).ToLower();
+
+                        //    try {
+                        //        if (ext is ".xaml") {
+                        //            using var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                        //            System.Windows.Markup.XamlWriter.Save(r.Editor.Document, stream);
+                        //        }
+                        //        else if (ext is ".rtf") {
+                        //            var exportDoc = CloneDocument(r.Editor.Document);
+                        //            PadEmptyParagraphsForRtf(exportDoc.Blocks);
+
+                        //            var range = new TextRange(exportDoc.ContentStart, exportDoc.ContentEnd);
+                        //            using var rtfStream = new System.IO.MemoryStream();
+                        //            range.Save(rtfStream, DataFormats.Rtf);
+
+                        //            using var xamlStream = new System.IO.MemoryStream();
+                        //            System.Windows.Markup.XamlWriter.Save(r.Editor.Document, xamlStream);
+                        //            string xamlBase64 = Convert.ToBase64String(xamlStream.ToArray());
+
+                        //            byte[] rtfBytes = rtfStream.ToArray();
+                        //            byte[] marker = System.Text.Encoding.ASCII.GetBytes("{\\*\\stickynotexaml " + xamlBase64 + "}");
+
+                        //            int end = rtfBytes.Length;
+                        //            while (end > 0 && rtfBytes[end - 1] is (byte)'\r' or (byte)'\n' or (byte)' ' or 0)
+                        //                end--;
+
+                        //            using var outStream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write);
+                        //            outStream.Write(rtfBytes, 0, end - 1);
+                        //            outStream.Write(marker, 0, marker.Length);
+                        //            outStream.WriteByte((byte)'}');
+                        //            outStream.Write(rtfBytes, end, rtfBytes.Length - end);
+                        //        }
+                        //        else {
+                        //            string text = new TextRange(r.Editor.Document.ContentStart, r.Editor.Document.ContentEnd).Text;
+                        //            System.IO.File.WriteAllText(dlg.FileName, text);
+                        //        }
+                        //    }
+                        //    catch (Exception ex) {
+                        //        MessageBox.Show(ex.ToString());
+                        //    }
+
+                        //    break;
+                        //}
                 }
 
                 r.Editor.Focus();
@@ -243,7 +310,7 @@ namespace WindowsStickies.Views {
                             TextPointer insertEnd = r.Editor.Selection.End;
                             TextPointer? insertStart = insertEnd.GetPositionAtOffset(-plainText.Length, LogicalDirection.Backward);
 
-                            if (insertStart != null)
+                            if (insertStart is not null)
                                 new TextRange(insertStart, insertEnd).ClearAllProperties();
 
                             r._clearFormattingOnNextInput = true;
@@ -306,28 +373,33 @@ namespace WindowsStickies.Views {
                             r.Editor.Selection.ApplyPropertyValue(TextElement.FontStyleProperty, FontStyles.Italic);
                         break;
 
-                    case "Underline": {
-                        var value = r.Editor.Selection.GetPropertyValue(Inline.TextDecorationsProperty);
-                        bool isUnderlined = value is TextDecorationCollection col &&
-                                                col.Any(d => d.Location == TextDecorationLocation.Underline);
-
-                        r.Editor.Selection.ApplyPropertyValue(
-                            Inline.TextDecorationsProperty,
-                            isUnderlined ? (object)DependencyProperty.UnsetValue : TextDecorations.Underline);
+                    case "Underline":
+                        ToggleTextDecoration(TextDecorationLocation.Underline, TextDecorations.Underline);
                         break;
-                    }
 
-                    case "Strikethrough": {
-                        var value = r.Editor.Selection.GetPropertyValue(Inline.TextDecorationsProperty);
-                        bool isStrike = value is TextDecorationCollection col &&
-                                            col.Any(d => d.Location == TextDecorationLocation.Strikethrough);
-
-                        r.Editor.Selection.ApplyPropertyValue(
-                            Inline.TextDecorationsProperty,
-                            isStrike ? (object)DependencyProperty.UnsetValue : TextDecorations.Strikethrough);
+                    case "Strikethrough":
+                        ToggleTextDecoration(TextDecorationLocation.Strikethrough, TextDecorations.Strikethrough);
                         break;
-                    }
                 }
+
+                void ToggleTextDecoration(TextDecorationLocation location, TextDecorationCollection decoration) {
+                    var value = r.Editor.Selection.GetPropertyValue(Inline.TextDecorationsProperty);
+                    var current = value is TextDecorationCollection col ? col : new TextDecorationCollection();
+
+                    bool exists = current.Any(d => d.Location == location);
+                    var result = new TextDecorationCollection();
+
+                    foreach (var item in current)
+                        if (item.Location != location)
+                            result.Add(item);
+
+                    if (!exists)
+                        foreach (var item in decoration)
+                            result.Add(item);
+
+                    r.Editor.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, result);
+                }
+
                 r.Editor.Focus();
             });
 
@@ -335,11 +407,20 @@ namespace WindowsStickies.Views {
                 if (r.DataContext != m.TargetViewModel)
                     return;
 
+                Span? link = r.GetSmartHyperlink(r.Editor.Selection);
+                if (link is not null) {
+                    link.FontFamily = m.FontFamily;
+                    return;
+                }
+
                 r.Editor.Selection.ApplyPropertyValue(TextElement.FontFamilyProperty, m.FontFamily);
             });
 
             WeakReferenceMessenger.Default.Register<MainView, ChangeFontSizeMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
+                    return;
+
+                if (r.TryApplyFontSizeToHyperlink(System.Convert.ToDouble(m.FontSize)))
                     return;
 
                 r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, m.FontSize);
@@ -370,36 +451,55 @@ namespace WindowsStickies.Views {
                         Span? cutLink2 = r.GetHyperlinkFromPointer(r.Editor.Selection.End);
 
                         if (cutLink1 is not null) {
-                            var r1 = new TextRange(cutLink1.ContentStart, cutLink1.ContentEnd);
-                            r1.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
-                            r1.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
+                            ClearFormatting(new TextRange(cutLink1.ContentStart, cutLink1.ContentEnd), TextElement.ForegroundProperty, Inline.TextDecorationsProperty);
                             cutLink1.Tag = null;
                             cutLink1.Style = null;
                         }
                         if (cutLink2 is not null) {
-                            var r2 = new TextRange(cutLink2.ContentStart, cutLink2.ContentEnd);
-                            r2.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
-                            r2.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
+                            ClearFormatting(new TextRange(cutLink2.ContentStart, cutLink2.ContentEnd), TextElement.ForegroundProperty, Inline.TextDecorationsProperty);
                             cutLink2.Tag = null;
                             cutLink2.Style = null;
                         }
                     }
 
-                    r.Editor.Selection.Text = "";
+                    bool inheritFromSelection = existingLink is not null || !r.Editor.Selection.IsEmpty;
+                    InlineFormatting formatting = r.CaptureInsertFormatting(inheritFromSelection);
+
+                    if (!r.Editor.Selection.IsEmpty)
+                        r.Editor.Selection.Text = "";
 
                     try {
                         var run = new Run(textToInsert);
-                        var link = new Span(run, r.Editor.Selection.Start) {
+                        var insertPos = r.Editor.Selection.Start.GetInsertionPosition(LogicalDirection.Forward)
+                                        ?? r.Editor.Selection.Start;
+
+                        var link = new Span(run, insertPos) {
                             Tag = safeUrl,
                             Style = (Style)r.FindResource("CustomHyperlinkStyle")
                         };
 
-                        var plainRun = new Run("", link.ElementEnd);
+                        link.FontFamily = formatting.FontFamily;
+                        link.FontSize = formatting.FontSize;
+                        link.FontStyle = formatting.FontStyle;
+                        link.FontWeight = formatting.FontWeight;
 
-                        r.Editor.Selection.Select(plainRun.ContentEnd, plainRun.ContentEnd);
+                        link.ClearValue(TextElement.ForegroundProperty);
+                        link.ClearValue(TextElement.BackgroundProperty);
+                        link.ClearValue(Inline.TextDecorationsProperty);
 
-                        r.Editor.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
-                        r.Editor.Selection.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
+                        UnnestHyperlink(link);
+
+                        var plainRun = new Run(string.Empty);
+                        if (link.Parent is Paragraph paragraph)
+                            paragraph.Inlines.InsertAfter(link, plainRun);
+                        else if (link.Parent is Span parentSpan)
+                            parentSpan.Inlines.InsertAfter(link, plainRun);
+
+                        plainRun.ClearValue(TextElement.ForegroundProperty);
+                        plainRun.ClearValue(TextElement.BackgroundProperty);
+                        plainRun.ClearValue(Inline.TextDecorationsProperty);
+
+                        r.Editor.CaretPosition = plainRun.ContentEnd;
                     }
                     catch { }
                 }
@@ -412,10 +512,9 @@ namespace WindowsStickies.Views {
 
                         var newEnd = r.Editor.CaretPosition;
                         var newStart = newEnd.GetPositionAtOffset(-plainText.Length, LogicalDirection.Backward);
-                        if (newStart != null) {
+                        if (newStart is not null) {
                             var newRange = new TextRange(newStart, newEnd);
-                            newRange.ApplyPropertyValue(TextElement.ForegroundProperty, DependencyProperty.UnsetValue);
-                            newRange.ApplyPropertyValue(Inline.TextDecorationsProperty, DependencyProperty.UnsetValue);
+                            ClearFormatting(newRange, TextElement.ForegroundProperty, Inline.TextDecorationsProperty);
                         }
 
                         link.Tag = null;
@@ -429,55 +528,92 @@ namespace WindowsStickies.Views {
                 if (r.DataContext != m.TargetViewModel)
                     return;
 
-                if (r.Editor.Selection.IsEmpty)
+                Span? sizedLink = r.GetSmartHyperlink(r.Editor.Selection);
+
+                if (r.Editor.Selection.IsEmpty && sizedLink is null)
                     return;
 
-                var currentSize = r.Editor.Selection.GetPropertyValue(TextElement.FontSizeProperty);
                 double fontSize = 12.0;
 
-                if (currentSize != DependencyProperty.UnsetValue && currentSize is double size)
+                if (sizedLink is not null && !double.IsNaN(sizedLink.FontSize))
+                    fontSize = sizedLink.FontSize;
+                else if (r.Editor.Selection.GetPropertyValue(TextElement.FontSizeProperty) is double size)
                     fontSize = size;
 
                 fontSize = Math.Min(fontSize + 1, 100);
-                r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
+
+                if (!r.TryApplyFontSizeToHyperlink(fontSize))
+                    r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
             });
 
             WeakReferenceMessenger.Default.Register<MainView, DecreaseFontSizeMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
                     return;
 
-                if (r.Editor.Selection.IsEmpty)
+                Span? sizedLink = r.GetSmartHyperlink(r.Editor.Selection);
+
+                if (r.Editor.Selection.IsEmpty && sizedLink is null)
                     return;
 
-                var currentSize = r.Editor.Selection.GetPropertyValue(TextElement.FontSizeProperty);
                 double fontSize = 12.0;
 
-                if (currentSize != DependencyProperty.UnsetValue && currentSize is double size)
+                if (sizedLink is not null && !double.IsNaN(sizedLink.FontSize))
+                    fontSize = sizedLink.FontSize;
+                else if (r.Editor.Selection.GetPropertyValue(TextElement.FontSizeProperty) is double size)
                     fontSize = size;
 
                 fontSize = Math.Max(fontSize - 1, 8);
-                r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
+
+                if (!r.TryApplyFontSizeToHyperlink(fontSize))
+                    r.Editor.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
             });
 
             WeakReferenceMessenger.Default.Register<MainView, BackupSelectionMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
                     return;
                 r._colorBackupStream?.Dispose();
+                r._colorBackupStream = null;
+                r._backupHyperlink = null;
 
-                if (r.Editor.Selection.IsEmpty) {
-                    r._colorBackupStream = null;
+                Span? link = r.GetSmartHyperlink(r.Editor.Selection);
+                if (link is not null && link.Tag is string url) {
+                    r._backupHyperlink = (link, url, link.FontFamily, link.FontSize,
+                        link.ReadLocalValue(TextElement.ForegroundProperty),
+                        link.ReadLocalValue(TextElement.BackgroundProperty));
                     return;
                 }
 
+                if (r.Editor.Selection.IsEmpty)
+                    return;
+
                 r._colorBackupStream = new System.IO.MemoryStream();
                 r.Editor.Selection.Save(r._colorBackupStream, DataFormats.Rtf);
-
                 r._backupStart = r.Editor.Selection.Start.GetPositionAtOffset(0, LogicalDirection.Forward);
                 r._backupEnd = r.Editor.Selection.End.GetPositionAtOffset(0, LogicalDirection.Backward);
             });
 
             WeakReferenceMessenger.Default.Register<MainView, RestoreSelectionMessage>(this, (r, m) => {
-                if (r.DataContext != m.TargetViewModel || r._colorBackupStream is null)
+                if (r.DataContext != m.TargetViewModel)
+                    return;
+                if (r._backupHyperlink is { } hlBackup) {
+                    hlBackup.Span.FontFamily = hlBackup.FontFamily;
+                    hlBackup.Span.FontSize = hlBackup.FontSize;
+
+                    if (hlBackup.LocalForeground == DependencyProperty.UnsetValue)
+                        hlBackup.Span.ClearValue(TextElement.ForegroundProperty);
+                    else if (hlBackup.LocalForeground is Brush fg)
+                        hlBackup.Span.Foreground = fg;
+
+                    if (hlBackup.LocalBackground == DependencyProperty.UnsetValue)
+                        hlBackup.Span.ClearValue(TextElement.BackgroundProperty);
+                    else if (hlBackup.LocalBackground is Brush bg)
+                        hlBackup.Span.Background = bg;
+
+                    r._backupHyperlink = null;
+                    return;
+                }
+
+                if (r._colorBackupStream is null)
                     return;
 
                 if (r._backupStart is not null && r._backupEnd is not null) {
@@ -499,13 +635,21 @@ namespace WindowsStickies.Views {
 
                 r._colorBackupStream?.Dispose();
                 r._colorBackupStream = null;
+                r._backupHyperlink = null;
             });
 
             WeakReferenceMessenger.Default.Register<MainView, ChangeFontColorMessage>(this, (r, m) => {
                 if (r.DataContext != m.TargetViewModel)
                     return;
 
-                var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
+                var brush = new SolidColorBrush(m.NewColor);
+
+                Span? link = r.GetSmartHyperlink(r.Editor.Selection);
+                if (link is not null) {
+                    link.Foreground = brush;
+                    return;
+                }
+
                 r.Editor.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, brush);
             });
 
@@ -513,7 +657,14 @@ namespace WindowsStickies.Views {
                 if (r.DataContext != m.TargetViewModel)
                     return;
 
-                var brush = new System.Windows.Media.SolidColorBrush(m.NewColor);
+                var brush = new SolidColorBrush(m.NewColor);
+
+                Span? link = r.GetSmartHyperlink(r.Editor.Selection);
+                if (link is not null) {
+                    link.Background = brush;
+                    return;
+                }
+
                 r.Editor.Selection.ApplyPropertyValue(TextElement.BackgroundProperty, brush);
             });
 
@@ -528,20 +679,20 @@ namespace WindowsStickies.Views {
                         vm.SelectedText = "";
 
                     var fgProperty = Editor.Selection.GetPropertyValue(TextElement.ForegroundProperty);
-                    if (fgProperty is System.Windows.Media.SolidColorBrush fgBrush)
+                    if (fgProperty is SolidColorBrush fgBrush)
                         vm.SelectedFontColor = fgBrush.Color.ToString();
                     else if (Editor.Selection.Start.Parent is TextElement fgParent) {
                         var firstCharProp = fgParent.GetValue(TextElement.ForegroundProperty);
-                        if (firstCharProp is System.Windows.Media.SolidColorBrush firstBrush)
+                        if (firstCharProp is SolidColorBrush firstBrush)
                             vm.SelectedFontColor = firstBrush.Color.ToString();
                     }
 
                     var bgProperty = Editor.Selection.GetPropertyValue(TextElement.BackgroundProperty);
-                    if (bgProperty is System.Windows.Media.SolidColorBrush bgBrush)
+                    if (bgProperty is SolidColorBrush bgBrush)
                         vm.SelectedHighlightColor = bgBrush.Color.ToString();
                     else if (Editor.Selection.Start.Parent is TextElement bgParent) {
                         var firstCharProp = bgParent.GetValue(TextElement.BackgroundProperty);
-                        if (firstCharProp is System.Windows.Media.SolidColorBrush firstBrush)
+                        if (firstCharProp is SolidColorBrush firstBrush)
                             vm.SelectedHighlightColor = firstBrush.Color.ToString();
                         else
                             vm.SelectedHighlightColor = "#00000000";
@@ -564,8 +715,8 @@ namespace WindowsStickies.Views {
             };
 
             Editor.SizeChanged += (s, e) => {
-                Editor.Document.PageWidth = Editor.ActualWidth;
-                DrawRuledLines();
+                UpdateEditorPageWidth();
+                InvalidateRuledLines();
             };
 
             Editor.TextChanged += (s, e) => {
@@ -577,11 +728,38 @@ namespace WindowsStickies.Views {
 
                 CleanGhostLinks();
 
+                bool addedTrailingSpace = false;
+
+                foreach (var change in e.Changes) {
+                    if (change.AddedLength <= 0)
+                        continue;
+
+                    TextPointer? start =
+                        Editor.Document.ContentStart.GetPositionAtOffset(
+                            change.Offset,
+                            LogicalDirection.Forward);
+
+                    TextPointer? end =
+                        start?.GetPositionAtOffset(
+                            change.AddedLength,
+                            LogicalDirection.Forward);
+
+                    if (start is not null && end is not null) {
+                        string addedText = new TextRange(start, end).Text;
+                        if (addedText.EndsWith(' '))
+                            addedTrailingSpace = true;
+                    }
+                }
+
                 _isTextDirty = true;
                 if (!_saveTimer.IsEnabled)
                     _saveTimer.Start();
 
-                DrawRuledLines();
+                InvalidateRuledLines();
+
+                // LINE BREAK
+                if (addedTrailingSpace)
+                    ForceTrailingSpaceWrap();
             };
 
             Editor.PreviewMouseLeftButtonDown += (s, e) => {
@@ -602,18 +780,17 @@ namespace WindowsStickies.Views {
 
             Editor.MouseMove += (s, e) => UpdateCursor();
             Editor.PreviewKeyUp += (s, e) => UpdateCursor();
-            
+
             Editor.PreviewKeyDown += (s, e) => {
                 UpdateCursor();
 
                 if (_clearFormattingOnNextInput && IsCaretNavigationKey(e.Key))
                     _clearFormattingOnNextInput = false;
 
-                if (e.Key == System.Windows.Input.Key.Down &&
-                    System.Windows.Input.Keyboard.Modifiers is System.Windows.Input.ModifierKeys.None or System.Windows.Input.ModifierKeys.Shift) {
+                if (e.Key == System.Windows.Input.Key.Down && System.Windows.Input.Keyboard.Modifiers is System.Windows.Input.ModifierKeys.None or System.Windows.Input.ModifierKeys.Shift) {
 
                     Editor.CaretPosition.GetLineStartPosition(1, out int linesMoved);
-                    if (linesMoved == 0) {
+                    if (linesMoved is 0) {
                         bool extendSelection = System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift;
                         var end = Editor.Document.ContentEnd;
 
@@ -633,6 +810,210 @@ namespace WindowsStickies.Views {
                 if (_clearFormattingOnNextInput && IsCaretNavigationKey(e.Key))
                     _clearFormattingOnNextInput = false;
             };
+        }
+
+        private void ForceTrailingSpaceWrap() {
+            if (_insertingTrailingSpaceLineBreak || _isLoading || !Editor.Selection.IsEmpty)
+                return;
+
+            TextPointer caret = Editor.CaretPosition;
+
+            int trailingSpaces = 0;
+            TextPointer firstSpace = caret;
+
+            while (firstSpace is not null) {
+                char? character = GetPreviousTextCharacter(firstSpace);
+                if (character is not ' ')
+                    break;
+
+                trailingSpaces++;
+
+                TextPointer? previous =
+                    firstSpace.GetNextInsertionPosition(LogicalDirection.Backward);
+
+                if (previous is null)
+                    break;
+
+                firstSpace = previous;
+            }
+
+            if (trailingSpaces is 0)
+                return;
+
+            TextPointer? lineStart = caret.GetLineStartPosition(0);
+            if (lineStart is null)
+                return;
+
+            Rect lineStartRect = lineStart.GetCharacterRect(LogicalDirection.Forward);
+            if (lineStartRect.IsEmpty)
+                return;
+
+            double pageWidth = Editor.Document.PageWidth;
+
+            if (double.IsNaN(pageWidth) ||
+                double.IsInfinity(pageWidth) ||
+                pageWidth <= 0) {
+                pageWidth = _editorViewport?.ViewportWidth ?? Editor.ActualWidth;
+            }
+
+            if (pageWidth <= 0)
+                return;
+
+            Thickness padding = Editor.Document.PagePadding;
+            double contentWidth = pageWidth - padding.Left - padding.Right;
+
+            if (contentWidth <= 0)
+                return;
+
+            double lineLeft = lineStartRect.Left;
+            double rightLimit = lineLeft + contentWidth;
+
+            var spaceStarts = new List<TextPointer>(trailingSpaces);
+            TextPointer? cursor = firstSpace;
+
+            for (int i = 0; i < trailingSpaces && cursor is not null; i++) {
+                spaceStarts.Add(cursor);
+                cursor = cursor.GetNextInsertionPosition(LogicalDirection.Forward);
+            }
+
+            if (spaceStarts.Count is 0)
+                return;
+
+            double currentRight = lineLeft;
+
+            TextPointer? beforeSpaces = firstSpace?.GetNextInsertionPosition(LogicalDirection.Backward);
+
+            if (beforeSpaces is not null &&
+                IsOnSameVisualLine(beforeSpaces, caret)) {
+                Rect previousRect =
+                    beforeSpaces.GetCharacterRect(LogicalDirection.Backward);
+
+                if (!previousRect.IsEmpty)
+                    currentRight = previousRect.Right;
+            }
+
+            for (int i = 0; i < spaceStarts.Count; i++) {
+                double spaceWidth = MeasureSpaceWidth(spaceStarts[i]);
+
+                if (spaceWidth <= 0)
+                    return;
+
+                currentRight += spaceWidth;
+
+                const double rightEdgeSafetyMargin = 21;
+
+                if (currentRight <= rightLimit - rightEdgeSafetyMargin)
+                    continue;
+
+                TextPointer breakPosition = spaceStarts[i];
+
+                _insertingTrailingSpaceLineBreak = true;
+
+                try {
+                    TextPointer afterBreak = breakPosition.InsertLineBreak();
+                    TextPointer newCaret = afterBreak;
+
+                    for (int j = i; j < spaceStarts.Count; j++) {
+                        TextPointer? next =
+                            newCaret.GetNextInsertionPosition(LogicalDirection.Forward);
+
+                        if (next is null)
+                            break;
+
+                        newCaret = next;
+                    }
+
+                    Editor.CaretPosition = newCaret;
+                }
+                finally {
+                    _insertingTrailingSpaceLineBreak = false;
+                }
+
+                return;
+            }
+        }
+
+        private static char? GetPreviousTextCharacter(TextPointer position) {
+            TextPointer? probe = position;
+
+            while (probe is not null) {
+                char[] buffer = new char[1];
+
+                int copied = probe.GetTextInRun(
+                    LogicalDirection.Backward,
+                    buffer,
+                    0,
+                    1);
+
+                if (copied is 1)
+                    return buffer[0];
+
+                TextPointer? previous =
+                    probe.GetNextContextPosition(LogicalDirection.Backward);
+
+                if (previous is null || previous.CompareTo(probe) >= 0)
+                    break;
+
+                probe = previous;
+            }
+
+            return null;
+        }
+
+        private static bool IsOnSameVisualLine(TextPointer first, TextPointer second) {
+            TextPointer? firstLine = first.GetLineStartPosition(0);
+            TextPointer? secondLine = second.GetLineStartPosition(0);
+
+            return firstLine is not null && secondLine is not null && firstLine.CompareTo(secondLine) is 0;
+        }
+
+        private double MeasureSpaceWidth(TextPointer spaceStart) {
+            TextPointer? spaceEnd =
+                spaceStart.GetNextInsertionPosition(LogicalDirection.Forward);
+
+            if (spaceEnd is null)
+                return 0;
+
+            var range = new TextRange(spaceStart, spaceEnd);
+
+            double fontSize = range.GetPropertyValue(TextElement.FontSizeProperty) is double size && size > 0 ? size : Editor.FontSize;
+            FontFamily fontFamily = range.GetPropertyValue(TextElement.FontFamilyProperty) is FontFamily family ? family : Editor.FontFamily;
+            FontStyle fontStyle = range.GetPropertyValue(TextElement.FontStyleProperty) is FontStyle style ? style : Editor.FontStyle;
+            FontWeight fontWeight = range.GetPropertyValue(TextElement.FontWeightProperty) is FontWeight weight ? weight : Editor.FontWeight;
+            FontStretch fontStretch = range.GetPropertyValue(TextElement.FontStretchProperty) is FontStretch stretch ? stretch : Editor.FontStretch;
+
+            var typeface = new Typeface(fontFamily, fontStyle, fontWeight, fontStretch);
+
+            double pixelsPerDip = VisualTreeHelper.GetDpi(Editor).PixelsPerDip;
+
+            var formattedText = new FormattedText(" ", System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeface, fontSize, Brushes.Transparent, pixelsPerDip);
+            double width = formattedText.WidthIncludingTrailingWhitespace;
+
+            double zoom = (DataContext as ViewModels.MainViewModel)?.StickyModel.Zoom ?? 1;
+            if (zoom <= 0)
+                zoom = 1;
+
+            return width * zoom;
+        }
+
+        private void UpdateEditorPageWidth() {
+            double width = _editorViewport?.ViewportWidth ?? Editor.ActualWidth;
+            if (width > 0)
+                Editor.Document.PageWidth = width;
+        }
+
+        private void UpdateEditorScrollBarWidth() {
+            if (_editorViewport is null)
+                return;
+
+            _editorViewport.ApplyTemplate();
+            _editorVerticalScrollBar ??= _editorViewport.Template.FindName("PART_VerticalScrollBar", _editorViewport) as ScrollBar;
+
+            if (_editorVerticalScrollBar is null)
+                return;
+
+            double zoom = (DataContext as ViewModels.MainViewModel)?.StickyModel.Zoom ?? 1;
+            _editorVerticalScrollBar.Width = ScrollBarScreenWidth / Math.Max(zoom, 0.01);
         }
 
         private static bool IsCaretNavigationKey(System.Windows.Input.Key key) {
@@ -672,6 +1053,24 @@ namespace WindowsStickies.Views {
             catch { }
         }
 
+        private static void ClearFormatting(TextRange range, params DependencyProperty[] properties) {
+            if (range.IsEmpty)
+                return;
+
+            foreach (var prop in properties) {
+                object current = range.GetPropertyValue(prop);
+                if (current is not null && current != DependencyProperty.UnsetValue)
+                    range.ApplyPropertyValue(prop, current);
+            }
+
+            for (TextPointer? p = range.Start; p is not null && p.CompareTo(range.End) <= 0; p = p.GetNextContextPosition(LogicalDirection.Forward)) {
+                if (p.Parent is Inline inline && inline.ContentStart.CompareTo(range.End) < 0) {
+                    foreach (var prop in properties)
+                        inline.ClearValue(prop);
+                }
+            }
+        }
+
         private FlowDocument CloneDocument(FlowDocument source) {
             using var stream = new System.IO.MemoryStream();
             System.Windows.Markup.XamlWriter.Save(source, stream);
@@ -684,11 +1083,11 @@ namespace WindowsStickies.Views {
                 if (block is Paragraph para) {
                     string text = new TextRange(para.ContentStart, para.ContentEnd).Text;
                     if (string.IsNullOrWhiteSpace(text)) {
-                        var bg = (para.Inlines.FirstInline?.GetValue(TextElement.BackgroundProperty) as System.Windows.Media.Brush) ?? para.Background;
+                        var bg = (para.Inlines.FirstInline?.GetValue(TextElement.BackgroundProperty) as Brush) ?? para.Background;
 
                         para.Inlines.Clear();
                         para.Inlines.Add(new Run(RtfMarkerText) {
-                            Foreground = bg ?? System.Windows.Media.Brushes.Transparent,
+                            Foreground = bg ?? Brushes.Transparent,
                             Background = bg
                         });
                     }
@@ -741,7 +1140,8 @@ namespace WindowsStickies.Views {
         }
 
         private void FindAndSelectText(string searchText) {
-            if (string.IsNullOrEmpty(searchText)) return;
+            if (string.IsNullOrEmpty(searchText))
+                return;
 
             TextPointer start = Editor.Selection.End;
             var foundRange = FindTextInRange(start, Editor.Document.ContentEnd, searchText);
@@ -799,6 +1199,111 @@ namespace WindowsStickies.Views {
             return foundLink;
         }
 
+        private readonly record struct InlineFormatting(
+            FontFamily FontFamily,
+            double FontSize,
+            FontStyle FontStyle,
+            FontWeight FontWeight);
+
+        private InlineFormatting CaptureInsertFormatting(bool fromSelection) {
+            var defaults = new InlineFormatting(Editor.FontFamily, Editor.FontSize, FontStyles.Normal, FontWeights.Normal);
+
+            TextRange? source = null;
+
+            if (fromSelection && !Editor.Selection.IsEmpty)
+                source = new TextRange(Editor.Selection.Start, Editor.Selection.End);
+            else {
+                TextPointer caret = Editor.Selection.Start;
+                TextPointer? prev = caret.GetNextInsertionPosition(LogicalDirection.Backward);
+
+                if (prev is not null && prev.Paragraph == caret.Paragraph && GetHyperlinkFromPointer(prev) is null)
+                    source = new TextRange(prev, caret);
+            }
+
+            if (source is null)
+                return defaults;
+
+            return defaults with {
+                FontSize = source.GetPropertyValue(TextElement.FontSizeProperty) is double size ? size : defaults.FontSize
+            };
+        }
+
+        private bool TryApplyFontSizeToHyperlink(double fontSize) {
+            Span? link = GetSmartHyperlink(Editor.Selection);
+            if (link is null)
+                return false;
+
+            link.FontSize = fontSize;
+            new TextRange(link.ContentStart, link.ContentEnd).ApplyPropertyValue(TextElement.FontSizeProperty, fontSize);
+
+            return true;
+        }
+
+        private static void UnnestHyperlink(Span link) {
+            while (link.Parent is Span parent) {
+                InlineCollection? host = parent.Parent switch {
+                    Paragraph p => p.Inlines,
+                    Span s => s.Inlines,
+                    _ => null
+                };
+                if (host is null)
+                    return;
+
+                var before = new List<Inline>();
+                var after = new List<Inline>();
+                bool passed = false;
+
+                foreach (Inline inline in parent.Inlines.Cast<Inline>().ToList()) {
+                    if (ReferenceEquals(inline, link)) {
+                        passed = true;
+                        continue;
+                    }
+                    (passed ? after : before).Add(inline);
+                }
+                if (!passed)
+                    return;
+
+                parent.Inlines.Remove(link);
+                foreach (var inline in before)
+                    parent.Inlines.Remove(inline);
+                foreach (var inline in after)
+                    parent.Inlines.Remove(inline);
+
+                Span? beforeSpan = null;
+                Span? afterSpan = null;
+
+                if (before.Count > 0) {
+                    beforeSpan = new Span();
+                    CopyInlineFormatting(parent, beforeSpan);
+                    foreach (var inline in before) beforeSpan.Inlines.Add(inline);
+                }
+                if (after.Count > 0) {
+                    afterSpan = new Span();
+                    CopyInlineFormatting(parent, afterSpan);
+                    foreach (var inline in after) afterSpan.Inlines.Add(inline);
+                }
+
+                host.InsertBefore(parent, link);
+                if (beforeSpan is not null)
+                    host.InsertBefore(link, beforeSpan);
+                if (afterSpan is not null)
+                    host.InsertAfter(link, afterSpan);
+                host.Remove(parent);
+            }
+        }
+
+        private static void CopyInlineFormatting(Span from, Span to) {
+            var values = from.GetLocalValueEnumerator();
+            while (values.MoveNext()) {
+                var entry = values.Current;
+                if (entry.Property.ReadOnly || entry.Property == FrameworkContentElement.NameProperty)
+                    continue;
+                if (entry.Value is System.Windows.Expression or System.Windows.Data.BindingExpressionBase)
+                    continue;
+                to.SetValue(entry.Property, entry.Value);
+            }
+        }
+
         private Span? GetHyperlinkFromPointer(TextPointer pointer) {
             DependencyObject parent = pointer.Parent;
 
@@ -826,13 +1331,8 @@ namespace WindowsStickies.Views {
                 if (run is null)
                     continue;
 
-                bool isLinkBlue =
-                    run.ReadLocalValue(TextElement.ForegroundProperty) is System.Windows.Media.SolidColorBrush b &&
-                    b.Color == System.Windows.Media.Color.FromRgb(0, 102, 204);
-
-                bool isUnderlined =
-                    run.ReadLocalValue(Inline.TextDecorationsProperty) is TextDecorationCollection col &&
-                    col.Any(d => d.Location == TextDecorationLocation.Underline);
+                bool isLinkBlue = run.ReadLocalValue(TextElement.ForegroundProperty) is SolidColorBrush b && b.Color == Color.FromRgb(0, 102, 204);
+                bool isUnderlined = run.ReadLocalValue(Inline.TextDecorationsProperty) is TextDecorationCollection col && col.Any(d => d.Location == TextDecorationLocation.Underline);
 
                 if (isLinkBlue && isUnderlined) {
                     run.ClearValue(Inline.TextDecorationsProperty);
@@ -841,109 +1341,110 @@ namespace WindowsStickies.Views {
             }
         }
 
+        private void InvalidateRuledLines() {
+            if (_ruledLinesQueued)
+                return;
+
+            _ruledLinesQueued = true;
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render, new Action(() => {
+                _ruledLinesQueued = false;
+                DrawRuledLines();
+            }));
+        }
+
         private void DrawRuledLines() {
-            RuledLinesCanvas.Children.Clear();
-
-            if (DataContext is not ViewModels.MainViewModel vm || !vm.StickyModel.IsRuledLines)
+            if (DataContext is not ViewModels.MainViewModel vm || !vm.StickyModel.IsRuledLines) {
+                RuledLinesCanvas.ClearLines();
                 return;
-
-            if (ActualHeight <= 0 || ActualWidth <= 0)
-                return;
-
-            double zoom = vm.StickyModel.Zoom;
-            if (zoom <= 0)
-                zoom = 1;
-
-            double localHeight = ActualHeight / zoom;
-
-            void AddLine(double localY) {
-                double y = localY * zoom;
-                var line = new System.Windows.Shapes.Line {
-                    X1 = 0,
-                    Y1 = y,
-                    X2 = ActualWidth,
-                    Y2 = y,
-                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 150, 150, 150)),
-                    StrokeThickness = 1,
-                    SnapsToDevicePixels = true
-                };
-                RuledLinesCanvas.Children.Add(line);
             }
 
+            double zoom = vm.StickyModel.Zoom <= 0 ? 1 : vm.StickyModel.Zoom;
+            double localHeight = Editor.ActualHeight;
+
+            if (localHeight <= 0 || ActualWidth <= 0) {
+                RuledLinesCanvas.ClearLines();
+                return;
+            }
+
+            var ys = _ruledLineBuffer;
+            ys.Clear();
+
             try {
-                var drawnYPositions = new HashSet<int>();
-                var allYPositions = new List<double>();
+                Editor.UpdateLayout();
+                TextPointer? pos = Editor.GetPositionFromPoint(new Point(1, 1), true) ?? Editor.Document.ContentStart;
+                pos = pos.GetLineStartPosition(0) ?? pos;
 
-                foreach (var block in Editor.Document.Blocks) {
-                    if (block is Paragraph para) {
-                        var paraStart = para.ContentStart.GetInsertionPosition(LogicalDirection.Forward);
-                        if (paraStart is null)
-                            continue;
+                double lastBottom = double.NaN;
+                int guard = 0;
 
-                        var pointer = paraStart;
-                        double currentLineMaxBottom = -1;
-                        double currentLineMinTop = -1;
+                while (pos is not null && guard++ < 2000) {
+                    var startRect = pos.GetCharacterRect(LogicalDirection.Forward);
+                    if (startRect.IsEmpty || startRect.Top > localHeight)
+                        break;
 
-                        while (pointer is not null) {
-                            var rect = pointer.GetCharacterRect(LogicalDirection.Forward);
+                    TextPointer? nextLine = pos.GetLineStartPosition(1, out int moved);
+                    double bottom = MeasureLineBottom(pos, moved > 0 ? nextLine : null);
 
-                            if (!rect.IsEmpty) {
-                                bool isNewLine = false;
+                    if (!double.IsNaN(bottom)) {
+                        if (bottom >= 0 && bottom <= localHeight)
+                            ys.Add(bottom);
 
-                                if (currentLineMinTop < 0) {
-                                    currentLineMinTop = rect.Top;
-                                    currentLineMaxBottom = rect.Bottom;
-                                }
-                                else if (rect.Top > currentLineMaxBottom - 2)
-                                    isNewLine = true;
-
-                                if (isNewLine) {
-                                    int yPos = (int)Math.Round(currentLineMaxBottom);
-                                    if (!drawnYPositions.Contains(yPos)) {
-                                        drawnYPositions.Add(yPos);
-                                        allYPositions.Add(currentLineMaxBottom);
-                                        AddLine(currentLineMaxBottom);
-                                    }
-                                    currentLineMinTop = rect.Top;
-                                    currentLineMaxBottom = rect.Bottom;
-                                }
-                                else {
-                                    currentLineMinTop = Math.Min(currentLineMinTop, rect.Top);
-                                    currentLineMaxBottom = Math.Max(currentLineMaxBottom, rect.Bottom);
-                                }
-                            }
-
-                            var nextPointer = pointer.GetNextInsertionPosition(LogicalDirection.Forward);
-                            if (nextPointer is null || nextPointer.CompareTo(pointer) <= 0)
-                                break;
-
-                            pointer = nextPointer;
-                        }
-
-                        if (currentLineMaxBottom >= 0) {
-                            int yPos = (int)Math.Round(currentLineMaxBottom);
-                            if (!drawnYPositions.Contains(yPos)) {
-                                drawnYPositions.Add(yPos);
-                                allYPositions.Add(currentLineMaxBottom);
-                                AddLine(currentLineMaxBottom);
-                            }
-                        }
+                        lastBottom = bottom;
                     }
+
+                    if (moved is 0 || nextLine is null || nextLine.CompareTo(pos) <= 0)
+                        break;
+
+                    pos = nextLine;
                 }
 
                 double baseLineHeight = 12 * 1.33;
+                double startY = double.IsNaN(lastBottom) ? 0 : lastBottom;
 
-                if (allYPositions.Count > 0) {
-                    double lastY = allYPositions[allYPositions.Count - 1];
-                    for (double y = lastY + baseLineHeight; y < localHeight; y += baseLineHeight)
-                        AddLine(y);
-                }
-                else {
-                    for (double y = baseLineHeight; y < localHeight; y += baseLineHeight)
-                        AddLine(y);
+                for (double y = startY + baseLineHeight; y < localHeight; y += baseLineHeight)
+                    ys.Add(y);
+
+                if (zoom is not 1)
+                    for (int i = 0; i < ys.Count; i++)
+                        ys[i] *= zoom;
+
+                RuledLinesCanvas.SetLines(ys);
+            }
+            catch {
+                RuledLinesCanvas.ClearLines();
+            }
+        }
+
+        private static double MeasureLineBottom(TextPointer lineStart, TextPointer? lineEnd) {
+            double bottom = double.NaN;
+            var p = lineStart;
+            int guard = 0;
+
+            while (p is not null && guard++ < 64) {
+                if (lineEnd is not null && p.CompareTo(lineEnd) >= 0)
+                    break;
+
+                var r = p.GetCharacterRect(LogicalDirection.Forward);
+                if (!r.IsEmpty && (double.IsNaN(bottom) || r.Bottom > bottom))
+                    bottom = r.Bottom;
+
+                var next = p.GetNextContextPosition(LogicalDirection.Forward);
+                if (next is null || next.CompareTo(p) <= 0)
+                    break;
+
+                p = next;
+            }
+
+            if (lineEnd is not null) {
+                var last = lineEnd.GetNextInsertionPosition(LogicalDirection.Backward);
+                if (last is not null) {
+                    var r = last.GetCharacterRect(LogicalDirection.Backward);
+                    if (!r.IsEmpty && (double.IsNaN(bottom) || r.Bottom > bottom))
+                        bottom = r.Bottom;
                 }
             }
-            catch { }
+
+            return bottom;
         }
     }
 }

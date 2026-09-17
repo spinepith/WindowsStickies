@@ -22,6 +22,8 @@
             <RichTextBox.InputBindings>
                 <KeyBinding Gesture="Ctrl+Space" Command="{Binding TitleBar.ClearFormattingCommand}"/>
                 <KeyBinding Gesture="Ctrl+Shift+V" Command="{Binding EditTextCommand}" CommandParameter="PasteWithoutFormatting"/>
+                <KeyBinding Gesture="Ctrl+T" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Strikethrough"/>
+                <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding TitleBar.ShowAllFontsCommand}"/>
                 <KeyBinding Gesture="Ctrl+K" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Hyperlink"/>
                 <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding TitleBar.IncreaseFontSizeCommand}"/>
                 <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command="{Binding TitleBar.ZoomInCommand}"/>
@@ -46,7 +48,8 @@
 
         </RichTextBox>
 
-        <Canvas x:Name="RuledLinesCanvas" IsHitTestVisible="False" Visibility="{Binding StickyModel.IsRuledLines, Converter={StaticResource BoolToVis}}"/>
+        <local:RuledLinesLayer x:Name="RuledLinesCanvas" Visibility="{Binding StickyModel.IsRuledLines, Converter={StaticResource BoolToVis}}"/>
+        
     </Grid>
 
 </UserControl>
