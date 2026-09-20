@@ -1,8 +1,12 @@
 ﻿<div align="center">
-  
-# Windows Stickies
+  <img src="/Assets/icon.png">
+  <h1>Windows Stickies</h1>
 
 </div>
+
+<img width="1105" height="632" alt="Image" src="https://github.com/user-attachments/assets/83e02696-4af7-4e73-ace4-8b6402248e0c" />
+
+---
 
 ### Полная свобода оформления
 Каждая ваша мысль уникальна, и её оформление должно быть таким же:
@@ -20,5 +24,3 @@
   программ, чтобы важная информация или референсы всегда были перед глазами.
 - **Масштабирование:** Текст слишком мелкий? Легко приближайте и отдаляйте содержимое заметки без потери
   качества.
-
-<img width="1104" height="633" alt="Image" src="https://github.com/user-attachments/assets/8e760e3e-aa88-47fe-98b6-5fd34c05605f" />
