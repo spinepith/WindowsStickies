@@ -26,7 +26,7 @@
         <KeyBinding Gesture="Ctrl+F" Command="{Binding TitleBar.FindCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding TitleBar.ShowAllFontsCommand}"/>
         <KeyBinding Gesture="Ctrl+T" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Strikethrough"/>
-        <KeyBinding Gesture="Ctrl+K" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Hyperlink"/>
+        <!--<KeyBinding Gesture="Ctrl+K" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Hyperlink"/>-->
         <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding TitleBar.IncreaseFontSizeCommand}"/>
         <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding TitleBar.DecreaseFontSizeCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+OemPlus" Command="{Binding TitleBar.ZoomInCommand}"/>

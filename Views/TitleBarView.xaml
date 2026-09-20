@@ -93,7 +93,7 @@
                             <MenuItem Header="{Binding [Menu_Font_Italic], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+I" Command="{Binding SetFontStyleCommand}" CommandParameter="Italic"/>
                             <MenuItem Header="{Binding [Menu_Font_Underline], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+U" Command="{Binding SetFontStyleCommand}" CommandParameter="Underline"/>
                             <MenuItem Header="{Binding [Menu_Font_Strikethrough], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+T" Command="{Binding SetFontStyleCommand}" CommandParameter="Strikethrough"/>
-                            <MenuItem Header="{Binding [Menu_Font_Hyperlink], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+K" Command="{Binding SetFontStyleCommand}" CommandParameter="Hyperlink"/>
+                            <!--<MenuItem Header="{Binding [Menu_Font_Hyperlink], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+K" Command="{Binding SetFontStyleCommand}" CommandParameter="Hyperlink"/>-->
                             <Separator />
                             <MenuItem Header="{Binding [Menu_Font_Increase], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl++" Command="{Binding IncreaseFontSizeCommand}"/>
                             <MenuItem Header="{Binding [Menu_Font_Decrease], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+-" Command="{Binding DecreaseFontSizeCommand}"/>
