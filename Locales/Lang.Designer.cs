@@ -187,6 +187,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Autostart.
+        /// </summary>
+        internal static string Menu_Autostart {
+            get {
+                return ResourceManager.GetString("Menu_Autostart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Change Border.
         /// </summary>
         internal static string Menu_ChangeBorder {

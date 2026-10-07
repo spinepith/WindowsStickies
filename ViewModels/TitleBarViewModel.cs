@@ -192,6 +192,13 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     }
     #endregion
 
+    #region AUTOSTART
+    [RelayCommand]
+    private void ToggleAutostart() {
+        Settings.Autostart = !Settings.Autostart;
+    }
+    #endregion
+
     #region ABOUT
     [RelayCommand]
     private void ShowAbout() {

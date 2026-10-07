@@ -1,7 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using System.Diagnostics;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 
 
@@ -14,12 +15,18 @@ public partial class SettingsService : ObservableObject {
     public static SettingsService Instance => _instance ??= Load();
 
     #region SETTINGS
+
     [ObservableProperty]
     private bool _isRoundedCorners = false;
 
     [ObservableProperty]
     private string _languageCode = "ru";
+
+    [ObservableProperty]
+    private bool _autostart = true;
+    partial void OnAutostartChanged(bool value) => AutostartService.Set(value);
     #endregion
+
 
     public SettingsService() {
         PropertyChanged += (s, e) => Save();
@@ -32,6 +39,7 @@ public partial class SettingsService : ObservableObject {
                 var settings = JsonSerializer.Deserialize<SettingsService>(json) ?? new SettingsService();
                 
                 settings.PropertyChanged += (s, e) => settings.Save();
+                AutostartService.Set(settings.Autostart);
                 return settings;
             }
         }

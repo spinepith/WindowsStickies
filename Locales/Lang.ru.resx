@@ -276,4 +276,7 @@
   <data name="Menu_Edit_ClearFormatting" xml:space="preserve">
     <value>Очистить форматирование</value>
   </data>
+  <data name="Menu_Autostart" xml:space="preserve">
+    <value>Автозапуск</value>
+  </data>
 </root>

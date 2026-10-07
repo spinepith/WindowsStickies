@@ -132,6 +132,9 @@
                         <MenuItem Header="{Binding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ChangeCornerRadiusCommand}" />
 
                         <Separator />
+                        <MenuItem Header="{Binding [Menu_Autostart], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ToggleAutostartCommand}" IsChecked="{Binding Settings.Autostart, Mode=OneWay}" />
+
+                        <Separator />
                         <MenuItem Header="{Binding [Menu_About], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ShowAboutCommand}" />
 
                     </MenuItem>
