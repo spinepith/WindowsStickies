@@ -171,8 +171,8 @@
   <data name="Menu_Edit_Cut" xml:space="preserve">
     <value>Вырезать</value>
   </data>
-  <data name="Menu_Edit_Delete" xml:space="preserve">
-    <value>Удалить</value>
+  <data name="Menu_Edit_Duplicate" xml:space="preserve">
+    <value>Дублировать</value>
   </data>
   <data name="Menu_Edit_Find" xml:space="preserve">
     <value>Поиск</value>

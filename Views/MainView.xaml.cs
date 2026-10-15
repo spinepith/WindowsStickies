@@ -273,28 +273,27 @@ namespace WindowsStickies.Views {
                             var selection = r.Editor.Selection;
 
                             if (Clipboard.ContainsData(DataFormats.XamlPackage)) {
-                                var stream = Clipboard.GetData(DataFormats.XamlPackage) as System.IO.MemoryStream;
-                                if (stream is not null) {
-                                    selection.Load(stream, DataFormats.XamlPackage);
+                                var pasteStream = Clipboard.GetData(DataFormats.XamlPackage) as System.IO.MemoryStream;
+                                if (pasteStream is not null) {
+                                    selection.Load(pasteStream, DataFormats.XamlPackage);
                                     break;
                                 }
                             }
 
                             if (Clipboard.ContainsData(DataFormats.Rtf)) {
-                                using var stream = new System.IO.MemoryStream();
+                                using var pasteStream = new System.IO.MemoryStream();
                                 var rtfData = Clipboard.GetData(DataFormats.Rtf) as string;
                                 if (rtfData is not null) {
                                     var bytes = System.Text.Encoding.ASCII.GetBytes(rtfData);
-                                    stream.Write(bytes, 0, bytes.Length);
-                                    stream.Position = 0;
-                                    selection.Load(stream, DataFormats.Rtf);
+                                    pasteStream.Write(bytes, 0, bytes.Length);
+                                    pasteStream.Position = 0;
+                                    selection.Load(pasteStream, DataFormats.Rtf);
                                     break;
                                 }
                             }
 
-                            if (Clipboard.ContainsText()) {
+                            if (Clipboard.ContainsText())
                                 selection.Text = Clipboard.GetText();
-                            }
                         }
                         catch {
                             System.Windows.Input.ApplicationCommands.Paste.Execute(null, r.Editor);
@@ -316,13 +315,38 @@ namespace WindowsStickies.Views {
                             r._clearFormattingOnNextInput = true;
                         }
                         break;
+                                            
+                    case EditCommandMessage.EditCommand.Duplicate: {
+                        TextRange source;
+                        TextPointer insertionPosition;
+                        bool addLineBreak = false;
 
-                    case EditCommandMessage.EditCommand.Delete:
-                        if (!r.Editor.Selection.IsEmpty)
-                            r.Editor.Selection.Text = "";
-                        else
-                            System.Windows.Input.ApplicationCommands.Delete.Execute(null, r.Editor);
+                        if (!r.Editor.Selection.IsEmpty) {
+                            source = r.Editor.Selection;
+                            insertionPosition = r.Editor.CaretPosition;
+                        }
+                        else {
+                            TextPointer caret = r.Editor.CaretPosition;
+                            TextPointer lineStart = caret.GetLineStartPosition(0) ?? caret;
+                            TextPointer? nextLineStart = caret.GetLineStartPosition(1, out int linesMoved);
+                            TextPointer lineEnd = linesMoved > 0 && nextLineStart is not null ? nextLineStart : r.Editor.Document.ContentEnd;
+
+                            source = new TextRange(lineStart, lineEnd);
+                            insertionPosition = lineEnd;
+                            addLineBreak = lineEnd.CompareTo(r.Editor.Document.ContentEnd) is 0;
+                        }
+
+                        using var dublicateStream = new System.IO.MemoryStream();
+                        source.Save(dublicateStream, DataFormats.XamlPackage);
+                        dublicateStream.Position = 0;
+
+                        r.Editor.Selection.Select(insertionPosition, insertionPosition);
+                        if (addLineBreak)
+                            r.Editor.Selection.Text = "\n";
+
+                        r.Editor.Selection.Load(dublicateStream, DataFormats.XamlPackage);
                         break;
+                    }
 
                     case EditCommandMessage.EditCommand.SelectAll:
                         System.Windows.Input.ApplicationCommands.SelectAll.Execute(null, r.Editor);

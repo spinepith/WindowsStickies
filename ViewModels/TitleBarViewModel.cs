@@ -89,8 +89,8 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
             case "PasteWithoutFormatting":
                 command = Models.EditCommandMessage.EditCommand.PasteWithoutFormatting;
                 break;
-            case "Delete":
-                command = Models.EditCommandMessage.EditCommand.Delete;
+            case "Duplicate":
+                command = Models.EditCommandMessage.EditCommand.Duplicate;
                 break;
             case "SelectAll":
                 command = Models.EditCommandMessage.EditCommand.SelectAll;

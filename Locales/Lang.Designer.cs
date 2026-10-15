@@ -322,11 +322,11 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Delete.
+        ///   Ищет локализованную строку, похожую на Duplicate.
         /// </summary>
-        internal static string Menu_Edit_Delete {
+        internal static string Menu_Edit_Duplicate {
             get {
-                return ResourceManager.GetString("Menu_Edit_Delete", resourceCulture);
+                return ResourceManager.GetString("Menu_Edit_Duplicate", resourceCulture);
             }
         }
         

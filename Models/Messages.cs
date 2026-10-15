@@ -132,7 +132,7 @@ public class EditCommandMessage {
         Copy,
         Paste,
         PasteWithoutFormatting,
-        Delete,
+        Duplicate,
         SelectAll
     }
 }
