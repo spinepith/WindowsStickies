@@ -38,4 +38,7 @@ public partial class StickyModel : ObservableObject {
 
     [ObservableProperty]
     private bool _isRuledLines = false;
+
+    [ObservableProperty]
+    private double _opacity = 1.0;
 }

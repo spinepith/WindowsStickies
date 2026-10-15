@@ -114,6 +114,32 @@
                             <MenuItem Header="{Binding [Menu_Color_Black], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#000000"/>
                             <Separator />
                             <MenuItem Header="{Binding [Menu_Color_ChooseColor], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}"/>
+                            <Separator />
+                            <MenuItem Header="{Binding [Menu_Color_Opacity], Source={x:Static locales:Localizer.Instance}}" IsHitTestVisible="False" Focusable="False"/>
+                            <MenuItem>
+                                <MenuItem.Header>
+                                    <Slider Minimum="0.2" Maximum="1.0" Value="{Binding Model.Opacity, Mode=TwoWay}">
+                                        <Slider.Template>
+                                            <ControlTemplate TargetType="Slider">
+                                                <Grid>
+                                                    <Border Height="1" Background="#40000000" VerticalAlignment="Center"/>
+                                                    <Track x:Name="PART_Track">
+                                                        <Track.Thumb>
+                                                            <Thumb Width="8" Height="8">
+                                                                <Thumb.Template>
+                                                                    <ControlTemplate TargetType="Thumb">
+                                                                        <Ellipse Fill="#FF000000"/>
+                                                                    </ControlTemplate>
+                                                                </Thumb.Template>
+                                                            </Thumb>
+                                                        </Track.Thumb>
+                                                    </Track>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Slider.Template>
+                                    </Slider>
+                                </MenuItem.Header>
+                            </MenuItem>
                         </MenuItem>
 
                         <MenuItem Header="{Binding [Menu_Language], Source={x:Static locales:Localizer.Instance}}" ItemsSource="{Binding AvailableLanguages}">

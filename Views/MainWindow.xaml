@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:WindowsStickies"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         WindowStyle="None"
+        AllowsTransparency="True"
         mc:Ignorable="d"
         Width="240"
         Height="240"
@@ -37,8 +38,8 @@
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="16" ResizeBorderThickness="4" CornerRadius="0"/>
     </shell:WindowChrome.WindowChrome>
-
-    <Grid RowDefinitions="16, *">
+    
+    <Grid x:Name="RootGrid" RowDefinitions="16, *" Background="{Binding StickyModel.BackgroundColor}" Opacity="{Binding StickyModel.Opacity}">
         <views:MainView Grid.Row="0" Grid.RowSpan="2" Margin="0, 16, 0, 0"/>
         <views:TitleBarView Grid.Row="0" DataContext="{Binding TitleBar}"/>
     </Grid>

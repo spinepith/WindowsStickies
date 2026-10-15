@@ -279,4 +279,7 @@
   <data name="Menu_Autostart" xml:space="preserve">
     <value>Autostart</value>
   </data>
+  <data name="Menu_Color_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
 </root>

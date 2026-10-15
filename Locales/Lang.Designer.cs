@@ -268,6 +268,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Opacity.
+        /// </summary>
+        internal static string Menu_Color_Opacity {
+            get {
+                return ResourceManager.GetString("Menu_Color_Opacity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Peach.
         /// </summary>
         internal static string Menu_Color_Peach {
