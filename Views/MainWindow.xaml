@@ -7,7 +7,6 @@
         xmlns:local="clr-namespace:WindowsStickies"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         WindowStyle="None"
-        AllowsTransparency="True"
         mc:Ignorable="d"
         Width="240"
         Height="240"
