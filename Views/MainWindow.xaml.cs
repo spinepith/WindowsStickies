@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -41,6 +41,12 @@ public partial class MainWindow : Window {
                 Width = vm.StickyModel.Width;
                 Height = vm.StickyModel.Height;
                 WindowState = vm.StickyModel.WindowState;
+                Opacity = vm.StickyModel.Opacity;
+
+                vm.StickyModel.PropertyChanged += (sender, args) => {
+                    if (args.PropertyName is nameof(vm.StickyModel.Opacity))
+                        Opacity = vm.StickyModel.Opacity;
+                };
             }
 
             UpdateMaximizedMargin();

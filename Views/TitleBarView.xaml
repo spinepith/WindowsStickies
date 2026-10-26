@@ -58,7 +58,7 @@
                 </Button>
 
                 <ToggleButton shell:WindowChrome.IsHitTestVisibleInChrome="True" Width="10" Height="16" Background="Transparent" x:Name="MenuButton" Padding="0" BorderThickness="0">
-                    <svgc:SvgViewbox Source="/Assets/settings.svg" Stretch="Uniform"/>
+                    <svgc:SvgViewbox Source="{Binding SettingsIconPath}" Stretch="Uniform"/>
                 </ToggleButton>
 
                 <Menu Width="0">
@@ -79,7 +79,7 @@
                             <MenuItem Header="{Binding [Menu_Edit_Copy], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+C" Command="{Binding EditTextCommand}" CommandParameter="Copy"/>
                             <MenuItem Header="{Binding [Menu_Edit_Paste], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+V" Command="{Binding EditTextCommand}" CommandParameter="Paste"/>
                             <MenuItem Header="{Binding [Menu_Edit_PasteWithoutFormatting], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Shift+V" Command="{Binding EditTextCommand}" CommandParameter="PasteWithoutFormatting"/>
-                            <MenuItem Header="{Binding [Menu_Edit_Delete], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+D" Command="{Binding EditTextCommand}" CommandParameter="Delete"/>
+                            <MenuItem Header="{Binding [Menu_Edit_Duplicate], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+D" Command="{Binding EditTextCommand}" CommandParameter="Duplicate"/>
                             <MenuItem Header="{Binding [Menu_Edit_SelectAll], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+A" Command="{Binding EditTextCommand}" CommandParameter="SelectAll"/>
                             <MenuItem Header="{Binding [Menu_Edit_ClearFormatting], Source={x:Static locales:Localizer.Instance}}" InputGestureText="Ctrl+Space" Command="{Binding ClearFormattingCommand}"/>
                             <Separator />
@@ -114,6 +114,32 @@
                             <MenuItem Header="{Binding [Menu_Color_Black], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}" CommandParameter="#000000"/>
                             <Separator />
                             <MenuItem Header="{Binding [Menu_Color_ChooseColor], Source={x:Static locales:Localizer.Instance}}" Command="{Binding BackgroundColorCommand}"/>
+                            <Separator />
+                            <MenuItem Header="{Binding [Menu_Color_Opacity], Source={x:Static locales:Localizer.Instance}}" IsHitTestVisible="False" Focusable="False"/>
+                            <MenuItem>
+                                <MenuItem.Header>
+                                    <Slider Minimum="0.2" Maximum="1.0" Value="{Binding Model.Opacity, Mode=TwoWay}">
+                                        <Slider.Template>
+                                            <ControlTemplate TargetType="Slider">
+                                                <Grid>
+                                                    <Border Height="1" Background="#40000000" VerticalAlignment="Center"/>
+                                                    <Track x:Name="PART_Track">
+                                                        <Track.Thumb>
+                                                            <Thumb Width="8" Height="8">
+                                                                <Thumb.Template>
+                                                                    <ControlTemplate TargetType="Thumb">
+                                                                        <Ellipse Fill="#FF000000"/>
+                                                                    </ControlTemplate>
+                                                                </Thumb.Template>
+                                                            </Thumb>
+                                                        </Track.Thumb>
+                                                    </Track>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Slider.Template>
+                                    </Slider>
+                                </MenuItem.Header>
+                            </MenuItem>
                         </MenuItem>
 
                         <MenuItem Header="{Binding [Menu_Language], Source={x:Static locales:Localizer.Instance}}" ItemsSource="{Binding AvailableLanguages}">
@@ -127,9 +153,15 @@
                             </MenuItem.ItemContainerStyle>
 
                         </MenuItem>
+                        
+                        <Separator />
+                        <MenuItem Header="{Binding [Menu_Readonly], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ToggleReadonlyCommand}" IsChecked="{Binding Model.IsReadonly, Mode=OneWay}" />
 
                         <Separator />
                         <MenuItem Header="{Binding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ChangeCornerRadiusCommand}" />
+
+                        <Separator />
+                        <MenuItem Header="{Binding [Menu_Autostart], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ToggleAutostartCommand}" IsChecked="{Binding Settings.Autostart, Mode=OneWay}" />
 
                         <Separator />
                         <MenuItem Header="{Binding [Menu_About], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ShowAboutCommand}" />

@@ -187,6 +187,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Autostart.
+        /// </summary>
+        internal static string Menu_Autostart {
+            get {
+                return ResourceManager.GetString("Menu_Autostart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Change Border.
         /// </summary>
         internal static string Menu_ChangeBorder {
@@ -259,6 +268,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Opacity.
+        /// </summary>
+        internal static string Menu_Color_Opacity {
+            get {
+                return ResourceManager.GetString("Menu_Color_Opacity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Peach.
         /// </summary>
         internal static string Menu_Color_Peach {
@@ -313,11 +331,11 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Delete.
+        ///   Ищет локализованную строку, похожую на Duplicate.
         /// </summary>
-        internal static string Menu_Edit_Delete {
+        internal static string Menu_Edit_Duplicate {
             get {
-                return ResourceManager.GetString("Menu_Edit_Delete", resourceCulture);
+                return ResourceManager.GetString("Menu_Edit_Duplicate", resourceCulture);
             }
         }
         
@@ -525,6 +543,15 @@ namespace WindowsStickies.Locales {
         internal static string Menu_NewSticky {
             get {
                 return ResourceManager.GetString("Menu_NewSticky", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Readonly.
+        /// </summary>
+        internal static string Menu_Readonly {
+            get {
+                return ResourceManager.GetString("Menu_Readonly", resourceCulture);
             }
         }
         

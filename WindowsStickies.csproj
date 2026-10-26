@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
 	<AssemblyName>Stickies</AssemblyName>
-	<Version>1.0.0</Version>
+	<Version>1.0.1</Version>
 	<ApplicationIcon>Assets\icon.ico</ApplicationIcon>	  
   </PropertyGroup>
 
@@ -35,7 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="ModernWpfUI" Version="1.0.0-rc.1" />
+    <!--<PackageReference Include="ModernWpfUI" Version="1.0.0-rc.1" />-->
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.4.2.3" />
     <PackageReference Include="SharpVectors" Version="1.8.6" />
   </ItemGroup>

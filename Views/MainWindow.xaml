@@ -22,7 +22,7 @@
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding TitleBar.NewStickyCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+V" Command="{Binding TitleBar.EditTextCommand}" CommandParameter="PasteWithoutFormatting"/>
-        <KeyBinding Gesture="Ctrl+D" Command="{Binding TitleBar.EditTextCommand}" CommandParameter="Delete"/>
+        <KeyBinding Gesture="Ctrl+D" Command="{Binding TitleBar.EditTextCommand}" CommandParameter="Duplicate"/>
         <KeyBinding Gesture="Ctrl+F" Command="{Binding TitleBar.FindCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding TitleBar.ShowAllFontsCommand}"/>
         <KeyBinding Gesture="Ctrl+T" Command="{Binding TitleBar.SetFontStyleCommand}" CommandParameter="Strikethrough"/>
@@ -37,8 +37,8 @@
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="16" ResizeBorderThickness="4" CornerRadius="0"/>
     </shell:WindowChrome.WindowChrome>
-
-    <Grid RowDefinitions="16, *">
+    
+    <Grid x:Name="RootGrid" RowDefinitions="16, *" Background="{Binding StickyModel.BackgroundColor}" Opacity="{Binding StickyModel.Opacity}">
         <views:MainView Grid.Row="0" Grid.RowSpan="2" Margin="0, 16, 0, 0"/>
         <views:TitleBarView Grid.Row="0" DataContext="{Binding TitleBar}"/>
     </Grid>

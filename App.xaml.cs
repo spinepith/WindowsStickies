@@ -42,4 +42,9 @@ public partial class App : Application {
         Locales.Localizer.Instance.SetLanguage(Services.SettingsService.Instance.LanguageCode);
         Services.WindowService.Instance.Initialize();
     }
+
+    protected override void OnExit(ExitEventArgs e) {
+        Services.HotkeyService.Instance.Unregister();
+        base.OnExit(e);
+    }
 }

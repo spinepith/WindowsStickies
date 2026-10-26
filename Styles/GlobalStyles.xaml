@@ -15,10 +15,11 @@
                         <Grid ColumnDefinitions="Auto, *, Auto, Auto">
 
                             <ContentPresenter Grid.Column="0" x:Name="Icon" ContentSource="Icon" VerticalAlignment="Center"/>
-                            <ContentPresenter Grid.Column="1" x:Name="HeaderHost" ContentSource="Header" VerticalAlignment="Center" Margin="0, 0, 16, 2"/>
+                            <ContentPresenter Grid.Column="1" x:Name="HeaderHost" ContentSource="Header" VerticalAlignment="Center" Margin="4, 0, 16, 2"/>
                             <TextBlock Grid.Column="2" Text="{TemplateBinding InputGestureText}" Foreground="Gray" VerticalAlignment="Center" Margin="0, 0, 0, 2"/>
                             <Path Grid.Column="3" x:Name="Arrow" VerticalAlignment="Center" Fill="Black" Data="M 0 0 L 4 3.5 L 0 7 Z" Visibility="Collapsed" Margin="0, 0, 2, 0"/>
-                            <Rectangle x:Name="SeparatorLine" Grid.ColumnSpan="4" Height="1" Fill="#B0B0B0" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            <Path Grid.Column="3" x:Name="CheckMark" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="Black" StrokeThickness="0" Visibility="Collapsed" Data="M 3,0 A 3,3 0 1 0 3,6 A 3,3 0 1 0 3,0"/>
+                            <Rectangle x:Name="SeparatorLine" Grid.ColumnSpan="5" Height="1" Fill="#B0B0B0" VerticalAlignment="Center" Visibility="Collapsed"/>
 
                             <Popup x:Name="PART_Popup" Placement="Right" HorizontalOffset="0" VerticalOffset="0" AllowsTransparency="True" CustomPopupPlacementCallback="{x:Static local:MenuPlacementHelper.SubmenuPlacement}" IsOpen="{TemplateBinding IsSubmenuOpen}">
                                 <Border Background="White" BorderBrush="LightGray" BorderThickness="1" Padding="4" CornerRadius="{Binding Source={x:Static local:CornerRadiusHelper.Instance}, Path=PopupRadius}">
@@ -30,6 +31,10 @@
                     </Border>
                     
                     <ControlTemplate.Triggers>
+
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Visibility" Value="Visible" TargetName="CheckMark"/>
+                        </Trigger>
 
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter Property="Background" Value="#EEEEEE" TargetName="Border"/>

@@ -171,8 +171,8 @@
   <data name="Menu_Edit_Cut" xml:space="preserve">
     <value>Cut</value>
   </data>
-  <data name="Menu_Edit_Delete" xml:space="preserve">
-    <value>Delete</value>
+  <data name="Menu_Edit_Duplicate" xml:space="preserve">
+    <value>Duplicate</value>
   </data>
   <data name="Menu_Edit_Find" xml:space="preserve">
     <value>Find</value>
@@ -275,5 +275,14 @@
   </data>
   <data name="Menu_Edit_ClearFormatting" xml:space="preserve">
     <value>Clear Formatting</value>
+  </data>
+  <data name="Menu_Autostart" xml:space="preserve">
+    <value>Autostart</value>
+  </data>
+  <data name="Menu_Color_Opacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="Menu_Readonly" xml:space="preserve">
+    <value>Readonly</value>
   </data>
 </root>

@@ -28,6 +28,9 @@ public partial class StickyModel : ObservableObject {
     private bool _isTopmost = false;
 
     [ObservableProperty]
+    private bool _isReadonly = false;
+    
+    [ObservableProperty]
     private string _backgroundColor = "NavajoWhite";
 
     [ObservableProperty]
@@ -38,4 +41,8 @@ public partial class StickyModel : ObservableObject {
 
     [ObservableProperty]
     private bool _isRuledLines = false;
+
+    [ObservableProperty]
+    private double _opacity = 1.0;
+
 }
