@@ -11,6 +11,7 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     private MainViewModel? _mainViewModel;
 
     public string PinIconPath => IsTopmost ? "/Assets/pinned.svg" : "/Assets/pin.svg";
+    public string SettingsIconPath => IsReadonly ? "/Assets/readonly.svg" : "/Assets/settings.svg";
     public Services.SettingsService Settings => Services.SettingsService.Instance;
 
     public System.Action<string>? EditorAction;
@@ -19,11 +20,11 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
 
     public Models.StickyModel Model { get; }
 
-
     public TitleBarViewModel(Models.StickyModel model, MainViewModel? mainViewModel = null) {
         Model = model;
         _mainViewModel = mainViewModel;
         IsTopmost = model.IsTopmost;
+        IsReadonly = model.IsReadonly;
 
         AvailableLanguages = new ObservableCollection<LanguageItem> {
             new LanguageItem { Name = "Русский", Code = "ru", Command = ChangeLanguageCommand },
@@ -34,6 +35,10 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PinIconPath))]
     private bool _isTopmost = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SettingsIconPath))]
+    private bool _isReadonly = false;
 
     #region TITLE BAR
     [RelayCommand]
@@ -196,6 +201,15 @@ public partial class TitleBarViewModel : BaseTitleBarViewModel {
     [RelayCommand]
     private void ToggleAutostart() {
         Settings.Autostart = !Settings.Autostart;
+    }
+    #endregion
+
+    #region READONLY
+    [RelayCommand]
+    private void ToggleReadonly() {
+        IsReadonly = !IsReadonly;
+        if (Model is not null)
+            Model.IsReadonly = IsReadonly;
     }
     #endregion
 

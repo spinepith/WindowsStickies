@@ -282,4 +282,7 @@
   <data name="Menu_Color_Opacity" xml:space="preserve">
     <value>Прозрачность</value>
   </data>
+  <data name="Menu_Readonly" xml:space="preserve">
+    <value>Только для чтения</value>
+  </data>
 </root>

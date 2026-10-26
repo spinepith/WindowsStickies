@@ -58,7 +58,7 @@
                 </Button>
 
                 <ToggleButton shell:WindowChrome.IsHitTestVisibleInChrome="True" Width="10" Height="16" Background="Transparent" x:Name="MenuButton" Padding="0" BorderThickness="0">
-                    <svgc:SvgViewbox Source="/Assets/settings.svg" Stretch="Uniform"/>
+                    <svgc:SvgViewbox Source="{Binding SettingsIconPath}" Stretch="Uniform"/>
                 </ToggleButton>
 
                 <Menu Width="0">
@@ -153,6 +153,9 @@
                             </MenuItem.ItemContainerStyle>
 
                         </MenuItem>
+                        
+                        <Separator />
+                        <MenuItem Header="{Binding [Menu_Readonly], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ToggleReadonlyCommand}" IsChecked="{Binding Model.IsReadonly, Mode=OneWay}" />
 
                         <Separator />
                         <MenuItem Header="{Binding [Menu_ChangeBorder], Source={x:Static locales:Localizer.Instance}}" Command="{Binding ChangeCornerRadiusCommand}" />

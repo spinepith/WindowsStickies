@@ -547,6 +547,15 @@ namespace WindowsStickies.Locales {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Readonly.
+        /// </summary>
+        internal static string Menu_Readonly {
+            get {
+                return ResourceManager.GetString("Menu_Readonly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Version.
         /// </summary>
         internal static string Version {

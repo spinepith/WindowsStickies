@@ -14,7 +14,7 @@
     </UserControl.Resources>
 
     <Grid>
-        <RichTextBox x:Name="Editor" IsInactiveSelectionHighlightEnabled="True" Background="Transparent" FontSize="12" Foreground="Black" Padding="0, 2">
+        <RichTextBox x:Name="Editor" IsInactiveSelectionHighlightEnabled="True" Background="Transparent" FontSize="12" Foreground="Black" Padding="0, 2" IsReadOnly="{Binding StickyModel.IsReadonly}">
             <RichTextBox.LayoutTransform>
                 <ScaleTransform ScaleX="{Binding StickyModel.Zoom}" ScaleY="{Binding StickyModel.Zoom}"/>
             </RichTextBox.LayoutTransform>
