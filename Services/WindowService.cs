@@ -38,6 +38,9 @@ public class WindowService {
                 DataContext = new MainViewModel(newSticky)
             };
             newNote.Show();
+
+            if (Application.Current.Windows.OfType<MainWindow>().Count() == 1)
+                HotkeyService.Instance.Initialize(newNote);
         });
 
         WeakReferenceMessenger.Default.Register<WindowService, Models.OpenFindTextMessage>(this, (r, m) => {
@@ -178,11 +181,16 @@ public class WindowService {
     }
 
     private void OpenSavedStickies() {
+        MainWindow? firstWindow = null;
         foreach (var sticky in SessionService.Instance.ActiveStickies) {
             var window = new MainWindow {
                 DataContext = new MainViewModel(sticky)
             };
             window.Show();
+            firstWindow ??= window;
         }
+
+        if (firstWindow != null)
+            HotkeyService.Instance.Initialize(firstWindow);
     }
 }
