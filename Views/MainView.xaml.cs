@@ -323,7 +323,7 @@ namespace WindowsStickies.Views {
 
                         if (!r.Editor.Selection.IsEmpty) {
                             source = r.Editor.Selection;
-                            insertionPosition = r.Editor.CaretPosition;
+                            insertionPosition = r.Editor.Selection.End;
                         }
                         else {
                             TextPointer caret = r.Editor.CaretPosition;
@@ -341,9 +341,12 @@ namespace WindowsStickies.Views {
                         dublicateStream.Position = 0;
 
                         r.Editor.Selection.Select(insertionPosition, insertionPosition);
-                        if (addLineBreak)
+                        if (addLineBreak) {
                             r.Editor.Selection.Text = "\n";
+                            insertionPosition = r.Editor.Selection.End;
+                        }
 
+                        r.Editor.Selection.Select(insertionPosition, insertionPosition);
                         r.Editor.Selection.Load(dublicateStream, DataFormats.XamlPackage);
                         break;
                     }
@@ -499,13 +502,12 @@ namespace WindowsStickies.Views {
 
                         var link = new Span(run, insertPos) {
                             Tag = safeUrl,
-                            Style = (Style)r.FindResource("CustomHyperlinkStyle")
+                            Style = (Style)r.FindResource("CustomHyperlinkStyle"),
+                            FontFamily = formatting.FontFamily,
+                            FontSize = formatting.FontSize,
+                            FontStyle = formatting.FontStyle,
+                            FontWeight = formatting.FontWeight
                         };
-
-                        link.FontFamily = formatting.FontFamily;
-                        link.FontSize = formatting.FontSize;
-                        link.FontStyle = formatting.FontStyle;
-                        link.FontWeight = formatting.FontWeight;
 
                         link.ClearValue(TextElement.ForegroundProperty);
                         link.ClearValue(TextElement.BackgroundProperty);
